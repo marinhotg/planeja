@@ -20,7 +20,7 @@ export default function Navbar({ onBack, onClear }: NavbarProps) {
 
         <button
           onClick={onClear}
-          className="text-blue-600 text-sm font-semibold font-inter hover:text-blue-800 transition-colors duration-200"
+          className="text-blue-600 text-sm font-semibold font-inter hover:text-blue-800 transition-colors duration-200 cursor-pointer"
         >
           Limpar
         </button>
