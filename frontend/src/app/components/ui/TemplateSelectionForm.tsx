@@ -4,6 +4,7 @@ import Image from "next/image";
 import Navbar from "../layout/Navbar";
 import PageTitle from "./PageTitle";
 import { useState } from 'react';
+import Button from "@/app/components/ui/Button";
 
 export default function TemplateSelectionForm() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -79,6 +80,7 @@ export default function TemplateSelectionForm() {
           </ul>
         </div>
       </div>
+      <Button className="w-full mt-8">Avançar</Button>
     </>
   );
 }
