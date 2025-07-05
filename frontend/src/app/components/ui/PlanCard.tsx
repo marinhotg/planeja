@@ -1,47 +1,50 @@
 import Image from "next/image";
+import React from 'react';
 
 interface PlanCardProps {
+  id: number;
   title: string;
-  features: string[];
-  isSelected?: boolean;
-  onClick?: () => void;
+  subtitle: string;
+  onView: (id: number) => void;
+  onDownload: (id: number) => void;
+  onDelete: (id: number) => void;
+  onFavorite: (id: number) => void;
+  favorited: boolean;
 }
 
 export default function PlanCard({
+  id,
   title,
-  features,
-  isSelected = false,
-  onClick,
+  subtitle,
+  onView,
+  onDownload,
+  onDelete,
+  onFavorite,
+  favorited,
 }: PlanCardProps) {
   return (
-    <div
-      onClick={onClick}
-      className={`w-96 px-8 pt-14 pb-8 relative bg-white rounded-xl shadow-[0px_1px_10px_0px_rgba(0,0,0,0.06)] flex flex-col gap-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 ${
-        isSelected ? "ring-2 ring-blue-600" : ""
-      }`}
-    >
-      <div className="flex flex-col gap-14">
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col gap-3">
-            <h3 className="text-blue-900 text-xl font-semibold font-inter leading-7">
-              {title}
-            </h3>
+    <div className="flex flex-col justify-between w-full p-6 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-blue-700 items-center gap-4 overflow-hidden">
+      <div className="self-stretch flex flex-col justify-center items-center gap-6">
+        <div className="self-stretch flex flex-col justify-start items-center gap-4">
+          <div className="flex flex-col justify-start items-center gap-1">
+            <div className="text-center justify-start text-blue-700 text-lg font-semibold leading-loose">{title}</div>
+            <div className="text-center justify-start text-blue-700 text-sm font-normal leading-snug">{subtitle}</div>
           </div>
-
-          <div className="flex flex-col gap-4">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <Image
-                  src="/checkmark-icon.svg"
-                  alt="Check"
-                  width={24}
-                  height={24}
-                />
-                <div className="flex-1 text-blue-700 text-base font-normal font-inter leading-relaxed">
-                  {feature}
-                </div>
-              </div>
-            ))}
+        </div>
+        <div className="inline-flex justify-center items-start gap-6">
+          <div className="flex justify-start items-start gap-4">
+            <button onClick={() => onView(id)} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
+              <Image src="/eye.svg" alt="Visualizar" width={16} height={16} />
+            </button>
+            <button onClick={() => onDownload(id)} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
+              <Image src="/download.svg" alt="Baixar" width={16} height={16} />
+            </button>
+            <button onClick={() => onDelete(id)} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
+              <Image src="/trash.svg" alt="Deletar" width={16} height={16} />
+            </button>
+            <button onClick={() => onFavorite(id)} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
+              <Image src={favorited ? "/filled-heart.svg" : "/heart.svg"} alt="Favoritar" width={16} height={16} />
+            </button>
           </div>
         </div>
       </div>
