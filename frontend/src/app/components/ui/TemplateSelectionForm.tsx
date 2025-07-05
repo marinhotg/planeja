@@ -17,7 +17,7 @@ export default function TemplateSelectionForm() {
     <>
       <PageTitle title="Personalize seu plano de aula" subtitle="Template" />
 
-      <Navbar onClear={() => setSelectedTemplate(null)} />
+      <Navbar onClear={() => setSelectedTemplate(null)} title="Escolha um template" />
 
       <div className="flex flex-col md:flex-row justify-center items-stretch gap-8 w-full">
         {/* Template Resumido */}

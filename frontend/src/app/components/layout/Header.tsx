@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Header() {
   return (
-    <div className="w-full h-16 bg-blue-700 border-b border-white/0">
+    <div className="fixed top-0 w-full z-50 h-16 bg-blue-700 border-b border-white/0">
       <div className="w-full max-w-[1336px] h-9 mx-auto px-[52px] pt-4">
         <div className="flex justify-between items-center h-full">
           <Image src="/menu-icon.svg" alt="Menu" width={28} height={28} />

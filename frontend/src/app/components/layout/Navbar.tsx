@@ -1,9 +1,10 @@
 interface NavbarProps {
   onBack?: () => void;
   onClear?: () => void;
+  title: string;
 }
 
-export default function Navbar({ onBack, onClear }: NavbarProps) {
+export default function Navbar({ onBack, onClear, title }: NavbarProps) {
   return (
     <div className="w-full max-w-[800px] h-14">
       <div className="flex justify-between items-center h-full px-6">
@@ -14,8 +15,8 @@ export default function Navbar({ onBack, onClear }: NavbarProps) {
           Voltar
         </button>
 
-        <h1 className="text-neutral-800 text-2xl font-bold font-inter">
-          Escolha um template
+        <h1 className="text-neutral-800 text-2xl font-bold font-inter text-center flex-1">
+          {title}
         </h1>
 
         <button

@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Button from "./Button";
+import InputLabel from "./InputLabel";
+import TextInput from "./TextInput";
 
 export default function LoginForm() {
   return (
@@ -19,18 +21,14 @@ export default function LoginForm() {
         </div>
         <div className="self-stretch flex flex-col justify-start items-start gap-4">
           <div className="self-stretch flex flex-col justify-start items-start gap-2">
-            <div className="self-stretch h-12 px-4 bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-blue-700 inline-flex justify-start items-center gap-2 overflow-hidden">
-              <div className="flex-1 flex justify-start items-center gap-2">
-                <input type="text" placeholder="Usuário" className="flex-1 justify-start text-blue-700 text-base font-normal leading-relaxed bg-transparent focus:outline-none" />
-              </div>
-            </div>
+            <InputLabel htmlFor="username">Usuário</InputLabel>
+            <TextInput id="username" type="text" placeholder="Usuário" />
           </div>
           <div className="self-stretch flex flex-col justify-start items-start gap-2">
-            <div className="self-stretch h-12 px-4 bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-blue-700 inline-flex justify-start items-center gap-2 overflow-hidden">
-              <div className="flex-1 flex justify-start items-center gap-2">
-                <input type="password" placeholder="Senha" className="flex-1 justify-start text-blue-700 text-base font-normal leading-relaxed bg-transparent focus:outline-none" />
-              </div>
-              <button className="w-4 h-4 relative overflow-hidden">
+            <InputLabel htmlFor="password">Senha</InputLabel>
+            <div className="relative w-full">
+              <TextInput id="password" type="password" placeholder="Senha" />
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 overflow-hidden">
                 <Image src="/user-icon.svg" alt="password icon" layout="fill" />
               </button>
             </div>
