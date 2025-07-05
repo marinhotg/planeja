@@ -1,0 +1,141 @@
+# =============================================================================
+# BNCC Processor - .gitignore
+# Pipeline Python para processamento da base BNCC
+# =============================================================================
+
+# =============================================================================
+# CONFIGURAÇÃO E CREDENCIAIS
+# =============================================================================
+
+# Variáveis de ambiente com API keys
+.env
+.env.local
+.env.production
+
+# =============================================================================
+# AMBIENTE PYTHON
+# =============================================================================
+
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# =============================================================================
+# DADOS PROCESSADOS (Arquivos grandes)
+# =============================================================================
+
+# Diretório completo de dados
+data/
+
+# PDFs da BNCC (podem ser baixados novamente)
+*.pdf
+
+# Dados extraídos e processados
+*_extracted.json
+*_complete.json
+*_chunks.json
+*_embeddings.json
+*_with_embeddings.json
+*_fixed.json
+id_mapping.json
+
+# Qualquer arquivo JSON grande (>1MB tipicamente)
+bncc_*.json
+
+# =============================================================================
+# MODELOS E CACHE
+# =============================================================================
+
+# Modelos de sentence-transformers baixados automaticamente
+.cache/
+cache/
+
+# Modelos de ML
+*.bin
+*.pt
+*.pth
+*.onnx
+*.h5
+
+# =============================================================================
+# DESENVOLVIMENTO E DEBUG
+# =============================================================================
+
+# Logs
+*.log
+logs/
+debug.log
+error.log
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Arquivos temporários
+*.tmp
+*.temp
+*~
+
+# Arquivos de teste
+test_*.py
+*_test.json
+
+# =============================================================================
+# IDEs ESPECÍFICOS PARA PYTHON
+# =============================================================================
+
+# PyCharm
+.idea/
+*.iml
+
+# VS Code Python
+.vscode/
+!.vscode/settings.json
+!.vscode/launch.json
+
+# Spyder
+.spyderproject
+.spyproject
+
+# =============================================================================
+# SISTEMA OPERACIONAL
+# =============================================================================
+
+# macOS
+.DS_Store
+._*
+
+# Windows  
+Thumbs.db
+Desktop.ini
+
+# Linux
+*~
+.directory
