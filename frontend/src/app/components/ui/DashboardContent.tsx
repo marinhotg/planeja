@@ -85,7 +85,7 @@ export default function DashboardContent() {
 
       <div className="w-full flex justify-center mb-4">
         <button onClick={() => setShowFilters(!showFilters)} className="text-blue-700 underline cursor-pointer">
-          {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+          {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
         </button>
       </div>
 
