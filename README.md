@@ -21,7 +21,7 @@ planeja/
 
 ```bash
 # Subir PostgreSQL
-docker-compose -f docker-compose.db.yml up -d
+docker compose -f docker-compose.db.yml up -d
 
 # Backend
 cd backend
