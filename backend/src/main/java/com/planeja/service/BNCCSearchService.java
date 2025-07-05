@@ -37,10 +37,6 @@ public class BNCCSearchService {
         this.objectMapper = new ObjectMapper();
     }
 
-    public List<BNCCContent> searchSimilar(String query, int topK) {
-        return searchWithFilters(query, null, null, topK);
-    }
-
     public List<BNCCContent> searchWithFilters(String query, String area, String etapa, int topK) {
         long startTime = System.currentTimeMillis();
         logger.info("Executing search with query: '{}', area: '{}', etapa: '{}', topK: {}", query, area, etapa, topK);
@@ -97,7 +93,7 @@ public class BNCCSearchService {
     }
 
     public List<BNCCContent> searchForEJA(String query, String disciplina, String nivelEnsino) {
-        return searchWithFilters(query, disciplina, nivelEnsino, 10); // Default topK to 10 for EJA
+        return searchWithFilters(query, disciplina, nivelEnsino, 10);
     }
 
     private BNCCContent toBNCCContent(JsonNode matchNode) {

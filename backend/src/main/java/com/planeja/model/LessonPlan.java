@@ -72,7 +72,7 @@ public class LessonPlan {
         private String descricao;
         private String duracao;
 
-        // Getters and Setters
+        
         public String getTitulo() {
             return titulo;
         }
