@@ -9,6 +9,7 @@ interface PlanCardProps {
   onDownload: (id: number) => void;
   onDelete: (id: number) => void;
   onFavorite: (id: number) => void;
+  favorited: boolean;
 }
 
 export default function PlanCard({
@@ -19,6 +20,7 @@ export default function PlanCard({
   onDownload,
   onDelete,
   onFavorite,
+  favorited,
 }: PlanCardProps) {
   return (
     <div className="flex flex-col justify-between w-full p-6 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-blue-700 items-center gap-4 overflow-hidden">
@@ -41,7 +43,7 @@ export default function PlanCard({
               <Image src="/trash.svg" alt="Deletar" width={16} height={16} />
             </button>
             <button onClick={() => onFavorite(id)} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
-              <Image src="/heart.svg" alt="Favoritar" width={16} height={16} />
+              <Image src={favorited ? "/filled-heart.svg" : "/heart.svg"} alt="Favoritar" width={16} height={16} />
             </button>
           </div>
         </div>
