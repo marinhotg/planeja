@@ -7,8 +7,6 @@ public class BNCCSearchRequest {
     private String etapa;
     private int topK;
 
-    // Getters and Setters
-
     public String getQuery() {
         return query;
     }

@@ -10,8 +10,6 @@ public class BNCCSearchResponse {
         this.results = results;
     }
 
-    // Getter and Setter
-
     public List<BNCCContent> getResults() {
         return results;
     }

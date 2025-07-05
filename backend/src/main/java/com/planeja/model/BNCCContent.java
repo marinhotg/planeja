@@ -14,8 +14,6 @@ public class BNCCContent {
     private double score;
     private boolean adaptavelEJA;
 
-    // Getters and Setters
-
     public String getId() {
         return id;
     }

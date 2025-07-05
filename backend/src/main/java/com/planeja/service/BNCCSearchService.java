@@ -51,16 +51,12 @@ public class BNCCSearchService {
                     .map(Double::floatValue)
                     .collect(Collectors.toList());
 
-            String pineconeUrl = String.format("https://%s-%s.svc.%s.pinecone.io/query",
-                    pineconeConfig.getIndexName(),
-                    pineconeConfig.getApiKey().substring(0, 4).toLowerCase(), // This is a placeholder, actual pod name is needed
-                    pineconeConfig.getEnvironment());
+            String pineconeUrl = String.format("%s/query", pineconeConfig.getHost());
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Api-Key", pineconeConfig.getApiKey());
 
-            // Construct the request body
             Map<String, Object> requestBody = new java.util.HashMap<>();
             requestBody.put("vector", embedding);
             requestBody.put("topK", topK);

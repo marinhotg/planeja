@@ -32,3 +32,4 @@ pinecone:
   api-key: ${PINECONE_API_KEY}
   index-name: bncc-planeja
   environment: us-east-1
+  host: ${PINECONE_HOST}

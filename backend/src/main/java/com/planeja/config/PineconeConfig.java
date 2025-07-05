@@ -17,6 +17,9 @@ public class PineconeConfig {
     @Value("${pinecone.environment}")
     private String environment;
 
+    @Value("${pinecone.host}")
+    private String host;
+
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
@@ -32,5 +35,9 @@ public class PineconeConfig {
 
     public String getEnvironment() {
         return environment;
+    }
+
+    public String getHost() {
+        return host;
     }
 }
