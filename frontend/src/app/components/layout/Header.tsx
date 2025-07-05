@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter, usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function Header() {
   const router = useRouter();
@@ -10,11 +10,32 @@ export default function Header() {
   const [showLogoutButton, setShowLogoutButton] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
+  const menuRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
   const isAuthPage = pathname === '/login' || pathname === '/register';
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowLogoutButton(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleLogout = () => {
     // Implementar lógica de logout (limpar tokens, etc.)
     router.push('/login');
+    setShowLogoutButton(false);
   };
 
   const handleGenerateNewPlan = () => {
@@ -23,12 +44,12 @@ export default function Header() {
   };
 
   const handleHistory = () => {
-    router.push('/dashboard'); // Assuming dashboard is the history page
+    router.push('/dashboard');
     setShowMenu(false);
   };
 
   const handleManageClassProfiles = () => {
-    router.push('/manage-class-profiles'); // Assuming class-profile is the manage profiles page
+    router.push('/manage-class-profiles');
     setShowMenu(false);
   };
 
@@ -37,7 +58,7 @@ export default function Header() {
       <div className="w-full max-w-[1336px] h-9 mx-auto px-[52px] pt-4">
         <div className={`flex items-center h-full ${isAuthPage ? 'justify-center' : 'justify-between'}`}>
           {!isAuthPage && (
-            <div className="relative">
+            <div className="relative" ref={menuRef}>
               <button onClick={() => setShowMenu(!showMenu)} className="cursor-pointer">
                 <Image src="/menu-icon.svg" alt="Menu" width={28} height={28} />
               </button>
@@ -72,7 +93,7 @@ export default function Header() {
           </div>
 
           {!isAuthPage && (
-            <div className="relative">
+            <div className="relative" ref={userMenuRef}>
               <button onClick={() => setShowLogoutButton(!showLogoutButton)} className="cursor-pointer">
                 <Image src="/user-icon.svg" alt="Usuário" width={28} height={28} />
               </button>
