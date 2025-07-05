@@ -13,6 +13,11 @@ export default function RegisterForm() {
     router.push('/login');
   };
 
+  const handleRegister = () => {
+    // Implementar lógica de cadastro
+    router.push('/login'); // Redirecionar para a página de login após o cadastro
+  };
+
   return (
     <>
       <div className="self-stretch flex flex-col justify-start items-center gap-8">
@@ -62,7 +67,7 @@ export default function RegisterForm() {
             </div>
           </div>
         </div>
-        <Button className="w-full">
+        <Button className="w-full" onClick={handleRegister}>
           Cadastrar
         </Button>
       </div>

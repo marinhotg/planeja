@@ -13,6 +13,11 @@ export default function LoginForm() {
     router.push('/register');
   };
 
+  const handleLogin = () => {
+    // Implementar lógica de login
+    router.push('/dashboard'); // Redirecionar para o dashboard após o login
+  };
+
   return (
     <>
       <div className="self-stretch flex flex-col justify-start items-center gap-8">
@@ -49,7 +54,7 @@ export default function LoginForm() {
             </div>
           </div>
         </div>
-        <Button className="w-full">
+        <Button className="w-full" onClick={handleLogin}>
           Entrar
         </Button>
       </div>
