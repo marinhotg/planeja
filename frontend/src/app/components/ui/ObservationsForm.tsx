@@ -17,13 +17,12 @@ export default function ObservationsForm() {
 
   const handleAdvance = () => {
     // Logic to save observations data if needed
-    // This is the last page, so no navigation for now
-    console.log("Avançar para a próxima etapa (finalizar)");
+    router.push('/generated-plan');
   };
 
   return (
     <>
-      <PageTitle title="Personalize seu plano de aula" subtitle="Observações" />
+      <PageTitle title="Personalize seu plano de aula" subtitle="Template > Aula > Perfil da turma > Observações" />
 
       <Navbar title="Observações" onClear={handleClear} />
 

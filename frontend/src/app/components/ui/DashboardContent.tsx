@@ -21,7 +21,7 @@ export default function DashboardContent() {
 
   const handleView = (id: number) => {
     console.log(`Visualizar plano ${id}`);
-    // Implement navigation to plan details page
+    router.push('/generated-plan'); // Navigate to the generated plan page
   };
 
   const handleDownload = (id: number) => {
