@@ -81,7 +81,7 @@ export default function ClassProfileForm() {
 
       <Navbar title="Perfil da turma" onClear={handleClear} />
 
-      <div className="w-full px-4 py-4 flex flex-col justify-start items-start gap-4">
+      <div className="w-full px-4 py-4 flex flex-col justify-start items-start gap-4 mt-[-1rem]">
         {/* Escolher perfil salvo */}
         <div className="self-stretch px-4 bg-black/0 rounded-xl inline-flex justify-center items-center gap-2 overflow-hidden">
           <button className="text-blue-700 text-lg font-semibold underline cursor-pointer">Escolher perfil salvo</button>
