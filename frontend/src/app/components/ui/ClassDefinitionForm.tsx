@@ -54,7 +54,7 @@ export default function ClassDefinitionForm() {
 
   return (
     <>
-      <PageTitle title="Personalize seu plano de aula" subtitle="Aula" />
+      <PageTitle title="Personalize seu plano de aula" subtitle="Template   >   Aula" />
 
       <Navbar title="Detalhes da aula" onClear={handleClear} />
 
@@ -81,6 +81,7 @@ export default function ClassDefinitionForm() {
             </select>
           </div>
         </div>
+        <div className="self-stretch border-b border-gray-200 my-2"></div>
 
         {/* Nível */}
         <div className="self-stretch flex flex-col justify-start items-start gap-2">
@@ -101,6 +102,7 @@ export default function ClassDefinitionForm() {
             </select>
           </div>
         </div>
+        <div className="self-stretch border-b border-gray-200 my-2"></div>
 
         {/* Tema da aula */}
         <div className="self-stretch flex flex-col justify-start items-start gap-2">
@@ -122,6 +124,7 @@ export default function ClassDefinitionForm() {
             </select>
           </div>
         </div>
+        <div className="self-stretch border-b border-gray-200 my-2"></div>
 
         {/* Duração da aula */}
         <div className="self-stretch flex flex-col justify-start items-start gap-2">
@@ -135,6 +138,7 @@ export default function ClassDefinitionForm() {
             min="0"
           />
         </div>
+        <div className="self-stretch border-b border-gray-200 my-2"></div>
 
         {/* Quantidade de aulas */}
         <div className="self-stretch flex flex-col justify-start items-start gap-2">
@@ -148,6 +152,7 @@ export default function ClassDefinitionForm() {
             min="1"
           />
         </div>
+        <div className="self-stretch border-b border-gray-200 my-2"></div>
 
         {/* Recursos disponíveis */}
         <div className="self-stretch flex flex-col justify-start items-start gap-2">
@@ -156,7 +161,7 @@ export default function ClassDefinitionForm() {
             {resources.map((resource) => (
               <button
                 key={resource}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 ${selectedResources.includes(resource) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedResources.includes(resource) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
                 onClick={() => handleResourceChange(resource)}
               >
                 {resource}
