@@ -1,9 +1,18 @@
+"use client"
+
 import Image from "next/image";
 import Button from "./Button";
 import InputLabel from "./InputLabel";
 import TextInput from "./TextInput";
+import { useRouter } from 'next/navigation';
 
 export default function LoginForm() {
+  const router = useRouter();
+
+  const handleRegisterClick = () => {
+    router.push('/register');
+  };
+
   return (
     <>
       <div className="self-stretch flex flex-col justify-start items-center gap-8">
@@ -15,7 +24,7 @@ export default function LoginForm() {
             <div className="self-stretch text-center justify-start text-blue-700 text-4xl font-semibold leading-10">Entrar</div>
             <div className="self-stretch text-center justify-start">
               <span className="text-blue-700 text-base font-normal leading-relaxed">Ainda não tem uma conta? </span>
-              <button className="text-blue-700 text-base font-semibold leading-relaxed">Cadastre-se</button>
+              <button onClick={handleRegisterClick} className="text-blue-700 text-base font-semibold leading-relaxed cursor-pointer">Cadastre-se</button>
             </div>
           </div>
         </div>
