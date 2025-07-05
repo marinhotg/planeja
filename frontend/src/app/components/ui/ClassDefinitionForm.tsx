@@ -7,6 +7,7 @@ import PageTitle from "./PageTitle";
 import Button from "./Button";
 import InputLabel from "./InputLabel";
 import TextInput from "./TextInput";
+import { useRouter } from 'next/navigation';
 
 export default function ClassDefinitionForm() {
   const [selectedDiscipline, setSelectedDiscipline] = useState<string | null>(null);
@@ -15,6 +16,8 @@ export default function ClassDefinitionForm() {
   const [classDuration, setClassDuration] = useState<number | null>(null);
   const [classQuantity, setClassQuantity] = useState<number | null>(null);
   const [selectedResources, setSelectedResources] = useState<string[]>([]);
+
+  const router = useRouter();
 
   const disciplines = ['Matemática', 'Português', 'História', 'Geografia', 'Ciências', 'Artes', 'Educação Física'];
   const levels = ['Nível I', 'Nível II', 'Nível III'];
@@ -50,6 +53,11 @@ export default function ClassDefinitionForm() {
     setClassDuration(null);
     setClassQuantity(null);
     setSelectedResources([]);
+  };
+
+  const handleAdvance = () => {
+    // Logic to save class definition data if needed
+    router.push('/class-profile');
   };
 
   return (
@@ -170,7 +178,7 @@ export default function ClassDefinitionForm() {
           </div>
         </div>
 
-        <Button className="w-full mt-8">Avançar</Button>
+      <Button className="w-full mt-8" onClick={handleAdvance}>Avançar</Button>
       </div>
     </>
   );

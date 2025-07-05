@@ -1,3 +1,7 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
+
 interface NavbarProps {
   onBack?: () => void;
   onClear?: () => void;
@@ -5,12 +9,22 @@ interface NavbarProps {
 }
 
 export default function Navbar({ onBack, onClear, title }: NavbarProps) {
+  const router = useRouter();
+
+  const handleBackClick = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      router.back();
+    }
+  };
+
   return (
     <div className="w-full max-w-[800px] h-14">
       <div className="flex justify-between items-center h-full px-6">
         <button
-          onClick={onBack}
-          className="text-blue-600 text-sm font-semibold font-inter hover:text-blue-800 transition-colors duration-200"
+          onClick={handleBackClick}
+          className="text-blue-600 text-sm font-semibold font-inter hover:text-blue-800 transition-colors duration-200 cursor-pointer"
         >
           Voltar
         </button>

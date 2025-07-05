@@ -4,13 +4,20 @@ import Image from "next/image";
 import Navbar from "../layout/Navbar";
 import PageTitle from "./PageTitle";
 import { useState } from 'react';
-import Button from "@/app/components/ui/Button";
+import Button from "./Button";
+import { useRouter } from 'next/navigation';
 
 export default function TemplateSelectionForm() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleTemplateClick = (template: string) => {
     setSelectedTemplate(template);
+  };
+
+  const handleAdvance = () => {
+    // Logic to save selected template if needed
+    router.push('/class-definition');
   };
 
   return (
@@ -80,7 +87,7 @@ export default function TemplateSelectionForm() {
           </ul>
         </div>
       </div>
-      <Button className="w-full mt-8">Avançar</Button>
+      <Button className="w-full mt-8" onClick={handleAdvance}>Avançar</Button>
     </>
   );
 }

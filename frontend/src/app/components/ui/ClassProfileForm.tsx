@@ -7,6 +7,7 @@ import PageTitle from "./PageTitle";
 import Button from "./Button";
 import InputLabel from "./InputLabel";
 import TextInput from "./TextInput";
+import { useRouter } from 'next/navigation';
 
 export default function ClassProfileForm() {
   const [classSize, setClassSize] = useState<number | null>(null);
@@ -16,6 +17,8 @@ export default function ClassProfileForm() {
   const [selectedProfessionalAreas, setSelectedProfessionalAreas] = useState<string[]>([]);
   const [selectedOtherProfiles, setSelectedOtherProfiles] = useState<string[]>([]);
   const [saveProfile, setSaveProfile] = useState(false);
+
+  const router = useRouter();
 
   const educationLevels = [
     'Reintegração escolar',
@@ -73,6 +76,11 @@ export default function ClassProfileForm() {
     setSelectedProfessionalAreas([]);
     setSelectedOtherProfiles([]);
     setSaveProfile(false);
+  };
+
+  const handleAdvance = () => {
+    // Logic to save class profile data if needed
+    router.push('/observations');
   };
 
   return (
@@ -196,7 +204,7 @@ export default function ClassProfileForm() {
           <InputLabel>Salvar <span className="text-blue-600 font-semibold">Perfil de turma</span>.</InputLabel>
         </div>
 
-        <Button className="w-full mt-8">Avançar</Button>
+      <Button className="w-full mt-8" onClick={handleAdvance}>Avançar</Button>
       </div>
     </>
   );
