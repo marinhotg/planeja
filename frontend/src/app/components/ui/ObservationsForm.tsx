@@ -30,7 +30,6 @@ export default function ObservationsForm() {
       <div className="w-full px-4 py-6 flex flex-col justify-start items-start gap-4">
         {/* Campo de Observações */}
         <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel htmlFor="observations">Observações</InputLabel>
           <textarea
             id="observations"
             className="w-full h-36 p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:focus:ring-blue-700 placeholder-gray-500"
