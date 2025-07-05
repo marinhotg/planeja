@@ -27,3 +27,8 @@ logging:
   level:
     com.planeja: DEBUG
     org.springframework.web: DEBUG
+
+pinecone:
+  api-key: ${PINECONE_API_KEY}
+  index-name: bncc-planeja
+  environment: us-east-1
