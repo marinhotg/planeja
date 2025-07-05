@@ -38,9 +38,9 @@ export default function ManageClassProfilesContent() {
 
   return (
     <>
-      <PageTitle title="Gerenciar Perfis de Turma" subtitle="" />
+      <PageTitle title="Gerenciar perfis de turma" subtitle="" />
 
-      <Navbar title="Perfis de Turma Salvos" onClear={handleClear} showBack={false} showClear={false} />
+      <Navbar title="Perfis de turma salvos" onClear={handleClear} showBack={false} showClear={false} />
 
       <div className="w-full px-4 py-6 flex flex-col justify-start items-start gap-4">
         {classProfiles.length === 0 ? (
@@ -66,7 +66,7 @@ export default function ManageClassProfilesContent() {
           </ul>
         )}
 
-        <Button className="w-full mt-8" onClick={handleAddNewProfile}>Adicionar Novo Perfil</Button>
+        <Button className="w-full mt-8" onClick={handleAddNewProfile}>Adicionar novo perfil</Button>
       </div>
     </>
   );

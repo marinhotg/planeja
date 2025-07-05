@@ -118,12 +118,11 @@ export default function NewClassProfileForm() {
     router.push('/manage-class-profiles');
   };
 
-  const pageTitle = profileId ? "Editar Perfil de Turma" : "Criar Novo Perfil de Turma";
-  const navbarTitle = profileId ? "Editar Perfil" : "Novo Perfil";
+  const navbarTitle = profileId ? "Editar perfil" : "Novo perfil";
 
   return (
     <>
-      <PageTitle title={pageTitle} subtitle="" />
+      <PageTitle title="Gerenciar perfis de turma" subtitle="" />
 
       <Navbar title={navbarTitle} onClear={handleClear} />
 
@@ -239,7 +238,7 @@ export default function NewClassProfileForm() {
           </div>
         </div>
 
-        <Button className="w-full mt-8" onClick={handleSaveProfile}>Salvar Perfil</Button>
+        <Button className="w-full mt-8" onClick={handleSaveProfile}>Salvar</Button>
       </div>
     </>
   );
