@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Navbar from "../layout/Navbar";
 import PageTitle from "./PageTitle";
 import Button from "./Button";
-import InputLabel from "./InputLabel";
 import { useRouter } from 'next/navigation';
 
 export default function ObservationsForm() {

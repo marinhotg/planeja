@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from 'react';
-import Image from "next/image";
 import Navbar from "../layout/Navbar";
 import PageTitle from "./PageTitle";
 import Button from "./Button";

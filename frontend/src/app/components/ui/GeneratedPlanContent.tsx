@@ -1,8 +1,6 @@
 "use client";
 
-import Navbar from "../layout/Navbar";
 import PageTitle from "./PageTitle";
-import Button from "./Button";
 import Image from "next/image";
 import { useState } from 'react';
 
