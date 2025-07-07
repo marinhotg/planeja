@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from 'react';
-import Image from "next/image";
 import Navbar from "../layout/Navbar";
 import PageTitle from "./PageTitle";
 import Button from "./Button";
 import InputLabel from "./InputLabel";
 import TextInput from "./TextInput";
+import ProfileSelectionModal from './ProfileSelectionModal';
 import { useRouter } from 'next/navigation';
 
 export default function ClassProfileForm() {
@@ -17,6 +17,8 @@ export default function ClassProfileForm() {
   const [selectedProfessionalAreas, setSelectedProfessionalAreas] = useState<string[]>([]);
   const [selectedOtherProfiles, setSelectedOtherProfiles] = useState<string[]>([]);
   const [saveProfile, setSaveProfile] = useState(false);
+  const [profileNameInput, setProfileNameInput] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const router = useRouter();
 
@@ -76,10 +78,35 @@ export default function ClassProfileForm() {
     setSelectedProfessionalAreas([]);
     setSelectedOtherProfiles([]);
     setSaveProfile(false);
+    setProfileNameInput('');
+  };
+
+  const handleSelectProfile = (profile: any) => {
+    setClassSize(profile.size);
+    setSelectedEducationLevels(profile.education);
+    setSelectedAgeRanges(profile.age);
+    setSelectedLifeContexts(profile.life);
+    setSelectedProfessionalAreas(profile.professional);
+    setSelectedOtherProfiles(profile.other);
+    setProfileNameInput(profile.name);
+    setSaveProfile(true); // Assume if a profile is loaded, it should be saved
   };
 
   const handleAdvance = () => {
-    // Logic to save class profile data if needed
+    if (saveProfile && profileNameInput.trim() === '') {
+      alert("Por favor, insira um nome para o perfil.");
+      return;
+    }
+    console.log("Salvar perfil:", {
+      profileName: saveProfile ? profileNameInput : 'Não salvo',
+      classSize,
+      selectedEducationLevels,
+      selectedAgeRanges,
+      selectedLifeContexts,
+      selectedProfessionalAreas,
+      selectedOtherProfiles,
+    });
+    // Implement save logic here
     router.push('/observations');
   };
 
@@ -92,7 +119,7 @@ export default function ClassProfileForm() {
       <div className="w-full px-4 py-4 flex flex-col justify-start items-start gap-4 mt-[-1rem]">
         {/* Escolher perfil salvo */}
         <div className="self-stretch px-4 bg-black/0 rounded-xl inline-flex justify-center items-center gap-2 overflow-hidden">
-          <button className="text-blue-700 text-lg font-semibold underline cursor-pointer">Escolher perfil salvo</button>
+          <button onClick={() => setIsModalOpen(true)} className="text-blue-700 text-lg font-semibold underline cursor-pointer">Escolher perfil salvo</button>
         </div>
 
         {/* Tamanho */}
@@ -197,15 +224,35 @@ export default function ClassProfileForm() {
         <div className="self-stretch py-4 inline-flex justify-start items-center gap-3">
           <input
             type="checkbox"
+            id="saveProfileCheckbox"
             className="w-5 h-5 rounded-[4px] text-blue-700 border-gray-300 focus:ring-blue-700"
             checked={saveProfile}
             onChange={(e) => setSaveProfile(e.target.checked)}
           />
-          <InputLabel>Salvar <span className="text-blue-600 font-semibold">Perfil de turma</span>.</InputLabel>
+          <InputLabel htmlFor="saveProfileCheckbox">Salvar <span className="text-blue-600 font-semibold">Perfil de turma</span>.</InputLabel>
         </div>
 
-      <Button className="w-full mt-8" onClick={handleAdvance}>Avançar</Button>
+        {saveProfile && (
+          <div className="self-stretch flex flex-col justify-start items-start gap-2 mt-4">
+            <InputLabel htmlFor="profileNameInput">Nome do perfil</InputLabel>
+            <TextInput
+              id="profileNameInput"
+              type="text"
+              placeholder="Ex: Meu Perfil de Turma"
+              value={profileNameInput}
+              onChange={(e) => setProfileNameInput(e.target.value)}
+            />
+          </div>
+        )}
+
+        <Button className="w-full mt-8" onClick={handleAdvance}>Avançar</Button>
       </div>
+
+      <ProfileSelectionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSelectProfile={handleSelectProfile}
+      />
     </>
   );
 }

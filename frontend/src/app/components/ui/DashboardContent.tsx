@@ -1,12 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import PageTitle from "./PageTitle";
 import Button from "./Button";
 import PlanCard from "./PlanCard";
 import { useRouter } from 'next/navigation';
 import { useState, useMemo } from 'react';
-import InputLabel from "./InputLabel";
 import FilterBox from "./FilterBox";
 
 export default function DashboardContent() {
