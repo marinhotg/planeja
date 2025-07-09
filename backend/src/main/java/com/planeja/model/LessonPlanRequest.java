@@ -16,7 +16,6 @@ public class LessonPlanRequest {
     private List<String> profissoes;
     private String observacoes;
 
-    // Getters e Setters
     public String getDisciplina() {
         return disciplina;
     }

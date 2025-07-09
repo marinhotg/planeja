@@ -47,9 +47,10 @@ public class PromptBuilder {
             O plano deve ser entregue exclusivamente no formato JSON, com os seguintes campos:
             {
               "titulo": "Nome atrativo e claro do plano de aula",
-              "objetivos": [
-                "Objetivo específico 1 baseado nas habilidades da BNCC",
-                "Objetivo específico 2 contextualizado para EJA"
+              "objetivoGeral": "Descreva o objetivo geral da aula de forma clara e concisa.",
+              "habilidadesTrabalhadas": [
+                "Habilidade específica 1 da BNCC trabalhada",
+                "Habilidade específica 2 da BNCC trabalhada"
               ],
               "metodologia": "Descrição da abordagem andragógica contextualizada",
               "atividades": [
@@ -59,22 +60,20 @@ public class PromptBuilder {
                   "duracao": "15min"
                 }
               ],
-              "recursos": [
+              "recursosNecessarios": [
                 "Lista dos recursos que serão efetivamente utilizados"
               ],
-              "avaliacao": "Como avaliar o aprendizado de forma formativa",
-              "observacoesEJA": "Orientações específicas para o contexto da EJA"
+              "metodosDeAvaliacao": "Como avaliar o aprendizado de forma formativa"
             }
             
             Instruções importantes:
-            1. PREENCHA TODOS OS CAMPOS - nenhum campo deve ficar null ou vazio
-            2. O título deve ser atrativo e refletir o tema da aula
-            3. Os objetivos devem citar especificamente as habilidades da BNCC trabalhadas
-            4. Liste apenas os recursos que serão realmente utilizados na aula
-            5. As observações EJA devem incluir dicas práticas para o professor
-            6. Use metodologias ativas, dialógicas e respeitosas com os adultos
-            7. A avaliação deve ser formativa, baseada na participação e aplicação prática
-            8. Gere somente o JSON como resposta, sem explicações adicionais
+            1. PREENCHA TODOS OS CAMPOS - nenhum campo deve ficar null ou vazio.
+            2. O título deve ser atrativo e refletir o tema da aula.
+            3. O campo 'habilidadesTrabalhadas' deve citar especificamente as habilidades da BNCC trabalhadas.
+            4. Liste apenas os recursos que serão realmente utilizados na aula.
+            5. Use metodologias ativas, dialógicas e respeitosas com os adultos.
+            6. A avaliação deve ser formativa, baseada na participação e aplicação prática.
+            7. Gere somente o JSON como resposta, sem explicações adicionais.
             """.formatted(
                 request.getDisciplina(),
                 request.getNivel(),

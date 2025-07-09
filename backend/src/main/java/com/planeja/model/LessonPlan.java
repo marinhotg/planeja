@@ -6,21 +6,19 @@ import java.util.ArrayList;
 public class LessonPlan {
 
     private String titulo;
-    private List<String> objetivos;
+    private String objetivoGeral;
+    private List<String> habilidadesTrabalhadas;
     private String metodologia;
     private List<Atividade> atividades;
-    private List<String> recursos;
-    private String avaliacao;
-    private String observacoesEJA;
+    private List<String> recursosNecessarios;
+    private String metodosDeAvaliacao;
 
-    // Construtor padrão
     public LessonPlan() {
-        this.objetivos = new ArrayList<>();
+        this.habilidadesTrabalhadas = new ArrayList<>();
         this.atividades = new ArrayList<>();
-        this.recursos = new ArrayList<>();
+        this.recursosNecessarios = new ArrayList<>();
     }
 
-    // Getters e Setters com validação básica
     public String getTitulo() {
         return titulo != null ? titulo : "";
     }
@@ -29,12 +27,20 @@ public class LessonPlan {
         this.titulo = titulo;
     }
 
-    public List<String> getObjetivos() {
-        return objetivos != null ? objetivos : new ArrayList<>();
+    public String getObjetivoGeral() {
+        return objetivoGeral != null ? objetivoGeral : "";
     }
 
-    public void setObjetivos(List<String> objetivos) {
-        this.objetivos = objetivos != null ? objetivos : new ArrayList<>();
+    public void setObjetivoGeral(String objetivoGeral) {
+        this.objetivoGeral = objetivoGeral;
+    }
+
+    public List<String> getHabilidadesTrabalhadas() {
+        return habilidadesTrabalhadas != null ? habilidadesTrabalhadas : new ArrayList<>();
+    }
+
+    public void setHabilidadesTrabalhadas(List<String> habilidadesTrabalhadas) {
+        this.habilidadesTrabalhadas = habilidadesTrabalhadas != null ? habilidadesTrabalhadas : new ArrayList<>();
     }
 
     public String getMetodologia() {
@@ -53,28 +59,20 @@ public class LessonPlan {
         this.atividades = atividades != null ? atividades : new ArrayList<>();
     }
 
-    public List<String> getRecursos() {
-        return recursos != null ? recursos : new ArrayList<>();
+    public List<String> getRecursosNecessarios() {
+        return recursosNecessarios != null ? recursosNecessarios : new ArrayList<>();
     }
 
-    public void setRecursos(List<String> recursos) {
-        this.recursos = recursos != null ? recursos : new ArrayList<>();
+    public void setRecursosNecessarios(List<String> recursosNecessarios) {
+        this.recursosNecessarios = recursosNecessarios != null ? recursosNecessarios : new ArrayList<>();
     }
 
-    public String getAvaliacao() {
-        return avaliacao != null ? avaliacao : "";
+    public String getMetodosDeAvaliacao() {
+        return metodosDeAvaliacao != null ? metodosDeAvaliacao : "";
     }
 
-    public void setAvaliacao(String avaliacao) {
-        this.avaliacao = avaliacao;
-    }
-
-    public String getObservacoesEJA() {
-        return observacoesEJA != null ? observacoesEJA : "";
-    }
-
-    public void setObservacoesEJA(String observacoesEJA) {
-        this.observacoesEJA = observacoesEJA;
+    public void setMetodosDeAvaliacao(String metodosDeAvaliacao) {
+        this.metodosDeAvaliacao = metodosDeAvaliacao;
     }
 
     public static class Atividade {
