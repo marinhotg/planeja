@@ -111,7 +111,7 @@ class BNCCCompleteChunker:
                         "type": "habilidades_ef",
                         "content": content,
                         "metadata": {
-                            "area": area,
+                            "area": remove_accents(area),
                             "ano": ano,
                             "etapa": "ensino_fundamental",
                             "codigos_habilidades": [hab['codigo'] for hab in chunk_habs],
@@ -159,7 +159,7 @@ class BNCCCompleteChunker:
                     "type": "habilidades_em",
                     "content": content,
                     "metadata": {
-                        "area": area,
+                        "area": remove_accents(area),
                         "ano": "Ensino Médio",
                         "etapa": "ensino_medio",
                         "codigos_habilidades": [hab['codigo'] for hab in chunk_habs],

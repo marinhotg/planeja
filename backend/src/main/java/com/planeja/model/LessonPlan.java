@@ -1,34 +1,50 @@
 package com.planeja.model;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class LessonPlan {
+
     private String titulo;
-    private List<String> objetivos;
+    private String objetivoGeral;
+    private List<String> habilidadesTrabalhadas;
     private String metodologia;
     private List<Atividade> atividades;
-    private List<String> recursos;
-    private String avaliacao;
-    private String observacoesEJA;
+    private List<String> recursosNecessarios;
+    private String metodosDeAvaliacao;
+
+    public LessonPlan() {
+        this.habilidadesTrabalhadas = new ArrayList<>();
+        this.atividades = new ArrayList<>();
+        this.recursosNecessarios = new ArrayList<>();
+    }
 
     public String getTitulo() {
-        return titulo;
+        return titulo != null ? titulo : "";
     }
 
     public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
 
-    public List<String> getObjetivos() {
-        return objetivos;
+    public String getObjetivoGeral() {
+        return objetivoGeral != null ? objetivoGeral : "";
     }
 
-    public void setObjetivos(List<String> objetivos) {
-        this.objetivos = objetivos;
+    public void setObjetivoGeral(String objetivoGeral) {
+        this.objetivoGeral = objetivoGeral;
+    }
+
+    public List<String> getHabilidadesTrabalhadas() {
+        return habilidadesTrabalhadas != null ? habilidadesTrabalhadas : new ArrayList<>();
+    }
+
+    public void setHabilidadesTrabalhadas(List<String> habilidadesTrabalhadas) {
+        this.habilidadesTrabalhadas = habilidadesTrabalhadas != null ? habilidadesTrabalhadas : new ArrayList<>();
     }
 
     public String getMetodologia() {
-        return metodologia;
+        return metodologia != null ? metodologia : "";
     }
 
     public void setMetodologia(String metodologia) {
@@ -36,35 +52,27 @@ public class LessonPlan {
     }
 
     public List<Atividade> getAtividades() {
-        return atividades;
+        return atividades != null ? atividades : new ArrayList<>();
     }
 
     public void setAtividades(List<Atividade> atividades) {
-        this.atividades = atividades;
+        this.atividades = atividades != null ? atividades : new ArrayList<>();
     }
 
-    public List<String> getRecursos() {
-        return recursos;
+    public List<String> getRecursosNecessarios() {
+        return recursosNecessarios != null ? recursosNecessarios : new ArrayList<>();
     }
 
-    public void setRecursos(List<String> recursos) {
-        this.recursos = recursos;
+    public void setRecursosNecessarios(List<String> recursosNecessarios) {
+        this.recursosNecessarios = recursosNecessarios != null ? recursosNecessarios : new ArrayList<>();
     }
 
-    public String getAvaliacao() {
-        return avaliacao;
+    public String getMetodosDeAvaliacao() {
+        return metodosDeAvaliacao != null ? metodosDeAvaliacao : "";
     }
 
-    public void setAvaliacao(String avaliacao) {
-        this.avaliacao = avaliacao;
-    }
-
-    public String getObservacoesEJA() {
-        return observacoesEJA;
-    }
-
-    public void setObservacoesEJA(String observacoesEJA) {
-        this.observacoesEJA = observacoesEJA;
+    public void setMetodosDeAvaliacao(String metodosDeAvaliacao) {
+        this.metodosDeAvaliacao = metodosDeAvaliacao;
     }
 
     public static class Atividade {
@@ -72,9 +80,8 @@ public class LessonPlan {
         private String descricao;
         private String duracao;
 
-        
         public String getTitulo() {
-            return titulo;
+            return titulo != null ? titulo : "";
         }
 
         public void setTitulo(String titulo) {
@@ -82,7 +89,7 @@ public class LessonPlan {
         }
 
         public String getDescricao() {
-            return descricao;
+            return descricao != null ? descricao : "";
         }
 
         public void setDescricao(String descricao) {
@@ -90,7 +97,7 @@ public class LessonPlan {
         }
 
         public String getDuracao() {
-            return duracao;
+            return duracao != null ? duracao : "";
         }
 
         public void setDuracao(String duracao) {
