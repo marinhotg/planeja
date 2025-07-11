@@ -76,6 +76,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>com.google.cloud.sql</groupId>
+            <artifactId>postgres-socket-factory</artifactId>
+            <version>1.25.1</version>
+        </dependency>
 	</dependencies>
 
 	<repositories>
@@ -87,6 +92,10 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+    <repository>
+        <id>central</id>
+        <url>https://repo1.maven.org/maven2</url>
+    </repository>
 	</repositories>
 
 	<build>
