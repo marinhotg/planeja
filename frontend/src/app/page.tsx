@@ -1,5 +1,8 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 // Ícones SVG simples
 const BookOpen = ({ className }: { className?: string }) => (
@@ -57,6 +60,8 @@ const Zap = ({ className }: { className?: string }) => (
 )
 
 export default function PlanEJALanding() {
+  const router = useRouter()
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Header */}
@@ -67,7 +72,10 @@ export default function PlanEJALanding() {
             <span className="text-2xl font-bold text-gray-900">PlanEJA</span>
           </Link>
           <div className="flex items-center space-x-3">
-            <button className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-md hover:bg-gray-100 transition-colors">
+            <button
+              className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-md hover:bg-gray-100 transition-colors"
+              onClick={() => router.push("/login")}
+            >
               Entrar
             </button>
           </div>
@@ -92,7 +100,10 @@ export default function PlanEJALanding() {
                   Jovens e Adultos (EJA), feita para apoiar quem ensina e transformar a experiência de quem aprende.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white text-lg font-medium rounded-md transition-colors">
+                  <button
+                    onClick={() => router.push("/login")}
+                    className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white text-lg font-medium rounded-md transition-colors"
+                  >
                     Comece Agora - É Grátis
                   </button>
                 </div>
@@ -201,7 +212,10 @@ export default function PlanEJALanding() {
                 ferramentas.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="px-8 py-3 bg-white text-green-600 hover:bg-gray-100 text-lg font-medium rounded-md transition-colors">
+                <button
+                  onClick={() => router.push("/login")}
+                  className="px-8 py-3 bg-white text-green-600 hover:bg-gray-100 text-lg font-medium rounded-md transition-colors"
+                >
                   Começar Agora
                 </button>
               </div>
