@@ -41,6 +41,7 @@ public class PromptBuilder {
             * Faixas etárias predominantes: %s
             * Contextos de vida: %s
             * Áreas profissionais predominantes: %s
+            * Outros perfis relevantes: %s
             
             Considere essas observações adicionais: %s
             
@@ -90,6 +91,7 @@ public class PromptBuilder {
                 formatList(request.getFaixas()),
                 formatList(request.getContextos()),
                 formatList(request.getProfissoes()),
+                formatList(request.getOutrosPerfis()),
                 request.getObservacoes()
             );
     }

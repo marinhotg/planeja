@@ -21,7 +21,7 @@ public class PineconeConfig {
     private String host;
 
     @Bean
-    public RestTemplate restTemplate() {
+    public RestTemplate pineconeRestTemplate() {
         return new RestTemplate();
     }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from "../layout/Navbar";
 import PageTitle from "./PageTitle";
 import Button from "./Button";
@@ -8,6 +8,9 @@ import InputLabel from "./InputLabel";
 import TextInput from "./TextInput";
 import ProfileSelectionModal from './ProfileSelectionModal';
 import { useRouter } from 'next/navigation';
+import { fetchConfigurations, ConfigurationResponse } from '@/lib/api';
+import MultiSelectButtons from "./MultiSelectButtons";
+import { UIClassProfile, isCompleteProfile } from '@/types/profile';
 
 export default function ClassProfileForm() {
   const [classSize, setClassSize] = useState<number | null>(null);
@@ -17,57 +20,65 @@ export default function ClassProfileForm() {
   const [selectedProfessionalAreas, setSelectedProfessionalAreas] = useState<string[]>([]);
   const [selectedOtherProfiles, setSelectedOtherProfiles] = useState<string[]>([]);
   const [saveProfile, setSaveProfile] = useState(false);
-  const [profileNameInput, setProfileNameInput] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [profileNameInput, setProfileNameInput] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [configurations, setConfigurations] = useState<ConfigurationResponse | null>(null);
+  const [loadingConfigs, setLoadingConfigs] = useState(true);
+  const [errorConfigs, setErrorConfigs] = useState<string | null>(null);
 
   const router = useRouter();
 
-  const educationLevels = [
-    'Reintegração escolar',
-    'Multissérie',
-    'Interesse em temas práticos',
-    'Alfabetização',
-    'Experiência com tecnologia',
-  ];
+  useEffect(() => {
+    const loadConfigurations = async () => {
+      try {
+        setLoadingConfigs(true);
+        const configs = await fetchConfigurations();
+        setConfigurations(configs);
+      } catch (err) {
+        setErrorConfigs('Failed to load configurations.');
+        console.error(err);
+      } finally {
+        setLoadingConfigs(false);
+      }
+    };
+    loadConfigurations();
+  }, []);
 
-  const ageRanges = [
-    'Jovens (15 a 24 anos)',
-    'Adultos (25 a 59 anos)',
-    'Idosos (60+ anos)',
-  ];
-
-  const lifeContexts = [
-    'Trabalhadores noturnos',
-    'Desempregados',
-    'Mães',
-    'Pais',
-    'Cuidadores familiares',
-    'Migrantes/recém-chegados',
-  ];
-
-  const professionalAreas = [
-    'Comércio e Vendas',
-    'Construção Civil',
-    'Transporte e Logística',
-    'Serviços Gerais',
-    'Alimentação',
-    'Agricultura',
-    'Cuidado e Saúde',
-    'Administração / Escritório',
-  ];
-
-  const otherProfiles = [
-    'Pessoas com deficiência',
-    'Povos originários',
-    'Pessoas privadas de liberdade',
-    'Refugiados',
-    'Estrangeiros',
-  ];
+  const educationLevels = configurations?.educationLevels || [];
+  const ageRanges = configurations?.ageRanges || [];
+  const lifeContexts = configurations?.lifeContexts || [];
+  const professionalAreas = configurations?.professionalAreas || [];
+  const otherProfiles = configurations?.otherProfiles || [];
 
   const handleMultiSelectChange = (setter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
     setter((prev) =>
       prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
     );
+  };
+
+  const handleAddNewOption = (field: keyof ConfigurationResponse, value: string) => {
+    if (configurations) {
+      const newOptions = [...(configurations[field] as string[]), value];
+      setConfigurations({ ...configurations, [field]: newOptions });
+
+      switch (field) {
+        case 'educationLevels':
+          setSelectedEducationLevels([...selectedEducationLevels, value]);
+          break;
+        case 'ageRanges':
+          setSelectedAgeRanges([...selectedAgeRanges, value]);
+          break;
+        case 'lifeContexts':
+          setSelectedLifeContexts([...selectedLifeContexts, value]);
+          break;
+        case 'professionalAreas':
+          setSelectedProfessionalAreas([...selectedProfessionalAreas, value]);
+          break;
+        case 'otherProfiles':
+          setSelectedOtherProfiles([...selectedOtherProfiles, value]);
+          break;
+      }
+    }
   };
 
   const handleClear = () => {
@@ -81,15 +92,21 @@ export default function ClassProfileForm() {
     setProfileNameInput('');
   };
 
-  const handleSelectProfile = (profile: any) => {
-    setClassSize(profile.size);
-    setSelectedEducationLevels(profile.education);
-    setSelectedAgeRanges(profile.age);
-    setSelectedLifeContexts(profile.life);
-    setSelectedProfessionalAreas(profile.professional);
-    setSelectedOtherProfiles(profile.other);
-    setProfileNameInput(profile.name);
-    setSaveProfile(true); // Assume if a profile is loaded, it should be saved
+  // Função handleSelectProfile usando o type guard compartilhado
+  const handleSelectProfile = (profile: UIClassProfile) => {
+    if (isCompleteProfile(profile)) {
+      setClassSize(profile.size || null);
+      setSelectedEducationLevels(profile.educationLevels || []);
+      setSelectedAgeRanges(profile.ageRanges || []);
+      setSelectedLifeContexts(profile.lifeContexts || []);
+      setSelectedProfessionalAreas(profile.professionalAreas || []);
+      setSelectedOtherProfiles(profile.otherProfiles || []);
+      setProfileNameInput(profile.profileName);
+      setSaveProfile(true);
+    } else {
+      console.error('Profile is missing userId or profileName properties', profile);
+      alert('Erro: Perfil inválido selecionado. Verifique se o perfil contém todas as informações necessárias.');
+    }
   };
 
   const handleAdvance = () => {
@@ -97,18 +114,28 @@ export default function ClassProfileForm() {
       alert("Por favor, insira um nome para o perfil.");
       return;
     }
-    console.log("Salvar perfil:", {
-      profileName: saveProfile ? profileNameInput : 'Não salvo',
-      classSize,
-      selectedEducationLevels,
-      selectedAgeRanges,
-      selectedLifeContexts,
-      selectedProfessionalAreas,
-      selectedOtherProfiles,
-    });
-    // Implement save logic here
+
+    const classProfileData = {
+      tamanho: classSize,
+      escolarizacao: selectedEducationLevels,
+      faixas: selectedAgeRanges,
+      contextos: selectedLifeContexts,
+      profissoes: selectedProfessionalAreas,
+      outrosPerfis: selectedOtherProfiles,
+      salvarPerfil: saveProfile,
+      nomePerfil: profileNameInput,
+    };
+    sessionStorage.setItem('lessonPlanProfile', JSON.stringify(classProfileData));
     router.push('/observations');
   };
+
+  if (loadingConfigs) {
+    return <p className="text-center text-gray-500 w-full">Loading configurations...</p>;
+  }
+
+  if (errorConfigs) {
+    return <p className="text-center text-red-500 w-full">Error: {errorConfigs}</p>;
+  }
 
   return (
     <>
@@ -136,89 +163,49 @@ export default function ClassProfileForm() {
         </div>
         <div className="self-stretch border-b border-gray-200 my-2"></div>
 
-        {/* Nível de escolarização */}
-        <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel>Nível de escolarização</InputLabel>
-          <div className="flex flex-wrap gap-2">
-            {educationLevels.map((level) => (
-              <button
-                key={level}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedEducationLevels.includes(level) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
-                onClick={() => handleMultiSelectChange(setSelectedEducationLevels, level)}
-              >
-                {level}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelectButtons
+          label="Nível de escolarização"
+          options={educationLevels}
+          selectedOptions={selectedEducationLevels}
+          onChange={(value) => handleMultiSelectChange(setSelectedEducationLevels, value)}
+          onAddNewOption={(value) => handleAddNewOption('educationLevels', value)}
+        />
         <div className="self-stretch border-b border-gray-200 my-2"></div>
 
-        {/* Faixa etária */}
-        <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel>Faixa etária</InputLabel>
-          <div className="flex flex-wrap gap-2">
-            {ageRanges.map((range) => (
-              <button
-                key={range}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedAgeRanges.includes(range) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
-                onClick={() => handleMultiSelectChange(setSelectedAgeRanges, range)}
-              >
-                {range}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelectButtons
+          label="Faixa etária"
+          options={ageRanges}
+          selectedOptions={selectedAgeRanges}
+          onChange={(value) => handleMultiSelectChange(setSelectedAgeRanges, value)}
+          onAddNewOption={(value) => handleAddNewOption('ageRanges', value)}
+        />
         <div className="self-stretch border-b border-gray-200 my-2"></div>
 
-        {/* Contexto de vida */}
-        <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel>Contexto de vida</InputLabel>
-          <div className="flex flex-wrap gap-2">
-            {lifeContexts.map((context) => (
-              <button
-                key={context}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedLifeContexts.includes(context) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
-                onClick={() => handleMultiSelectChange(setSelectedLifeContexts, context)}
-              >
-                {context}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelectButtons
+          label="Contexto de vida"
+          options={lifeContexts}
+          selectedOptions={selectedLifeContexts}
+          onChange={(value) => handleMultiSelectChange(setSelectedLifeContexts, value)}
+          onAddNewOption={(value) => handleAddNewOption('lifeContexts', value)}
+        />
         <div className="self-stretch border-b border-gray-200 my-2"></div>
 
-        {/* Área profissional */}
-        <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel>Área profissional</InputLabel>
-          <div className="flex flex-wrap gap-2">
-            {professionalAreas.map((area) => (
-              <button
-                key={area}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedProfessionalAreas.includes(area) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
-                onClick={() => handleMultiSelectChange(setSelectedProfessionalAreas, area)}
-              >
-                {area}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelectButtons
+          label="Área profissional"
+          options={professionalAreas}
+          selectedOptions={selectedProfessionalAreas}
+          onChange={(value) => handleMultiSelectChange(setSelectedProfessionalAreas, value)}
+          onAddNewOption={(value) => handleAddNewOption('professionalAreas', value)}
+        />
         <div className="self-stretch border-b border-gray-200 my-2"></div>
 
-        {/* Outros perfis relevantes */}
-        <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel>Outros perfis relevantes</InputLabel>
-          <div className="flex flex-wrap gap-2">
-            {otherProfiles.map((profile) => (
-              <button
-                key={profile}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedOtherProfiles.includes(profile) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
-                onClick={() => handleMultiSelectChange(setSelectedOtherProfiles, profile)}
-              >
-                {profile}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelectButtons
+          label="Outros perfis relevantes"
+          options={otherProfiles}
+          selectedOptions={selectedOtherProfiles}
+          onChange={(value) => handleMultiSelectChange(setSelectedOtherProfiles, value)}
+          onAddNewOption={(value) => handleAddNewOption('otherProfiles', value)}
+        />
 
         {/* Salvar perfil */}
         <div className="self-stretch py-4 inline-flex justify-start items-center gap-3">

@@ -1,34 +1,33 @@
 package com.planeja.service;
 
-import com.planeja.model.BNCCContent;
 import com.planeja.model.LessonPlan;
-import com.planeja.model.LessonPlanRequest;
+import com.planeja.repository.LessonPlanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class LessonPlanService {
 
     @Autowired
-    private BNCCSearchService bnccService;
+    private LessonPlanRepository lessonPlanRepository;
 
-    @Autowired
-    private PromptBuilder promptBuilder;
+    public List<LessonPlan> findAll() {
+        return lessonPlanRepository.findAll();
+    }
 
-    @Autowired
-    private GeminiService geminiService;
+    public Optional<LessonPlan> findById(UUID id) {
+        return lessonPlanRepository.findById(id);
+    }
 
-    public LessonPlan generateLessonPlan(LessonPlanRequest request) {
-        List<BNCCContent> habilidades = bnccService.searchForEJA(
-                request.getTema(),
-                request.getDisciplina(),
-                "ensino_fundamental"
-        );
+    public LessonPlan save(LessonPlan lessonPlan) {
+        return lessonPlanRepository.save(lessonPlan);
+    }
 
-        String prompt = promptBuilder.buildPrompt(request, habilidades);
-
-        return geminiService.generatePlan(prompt);
+    public void deleteById(UUID id) {
+        lessonPlanRepository.deleteById(id);
     }
 }
