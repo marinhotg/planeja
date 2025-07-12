@@ -1,14 +1,24 @@
 package com.planeja.controller;
 
+import com.planeja.dto.LessonPlanDTO;
 import com.planeja.model.LessonPlan;
 import com.planeja.model.LessonPlanRequest;
+import com.planeja.model.User;
 import com.planeja.service.LessonPlanService;
+import com.planeja.service.UserService;
+import com.planeja.service.ClassProfileService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/lesson-plans")
@@ -17,9 +27,208 @@ public class LessonPlanController {
     @Autowired
     private LessonPlanService lessonPlanService;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private ClassProfileService classProfileService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    // Existing generate endpoint, modified to save the plan
     @PostMapping("/generate")
-    public ResponseEntity<LessonPlan> generateLessonPlan(@RequestBody LessonPlanRequest request) {
-        LessonPlan plan = lessonPlanService.generateLessonPlan(request);
-        return ResponseEntity.ok(plan);
+    public ResponseEntity<LessonPlanDTO> generateLessonPlan(@RequestBody LessonPlanRequest request) {
+        // This is a placeholder for actual AI generation logic.
+        // For now, we'll just create a dummy generated content.
+        String generatedContent = "{\"title\":\"Plano de Aula Gerado\",\"sections\":[{\"title\":\"Objetivo Geral\",\"content\":\"Ensinar sobre o tema: " + request.getTema() + "\"}]}";
+
+        LessonPlan lessonPlan = new LessonPlan();
+        // Assuming a default user for now, or retrieve from context/auth
+        // For a real application, you'd get the authenticated user's ID
+        User dummyUser = userService.findById(UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")) // Replace with a valid user ID or create one
+                .orElseGet(() -> {
+                    User newUser = new User("Dummy User", "dummy@example.com", "passwordhash");
+                    return userService.save(newUser);
+                });
+        lessonPlan.setUser(dummyUser);
+
+        lessonPlan.setDiscipline(request.getDisciplina());
+        lessonPlan.setLevel(request.getNivel());
+        lessonPlan.setTheme(request.getTema());
+        lessonPlan.setDurationMinutes(request.getDuracao());
+        lessonPlan.setQuantity(request.getQuantidade());
+        try {
+            lessonPlan.setResources(objectMapper.writeValueAsString(request.getRecursos()));
+        } catch (JsonProcessingException e) {
+            lessonPlan.setResources("[]"); // Default to empty array on error
+        }
+
+        // Handle class profile or direct class details
+        if (request.getSalvarPerfil() != null && request.getSalvarPerfil()) {
+            // Logic to save or link to a class profile
+            // For now, we'll just use the direct details
+        }
+        lessonPlan.setClassSize(request.getTamanho());
+        try {
+            lessonPlan.setEducationLevels(objectMapper.writeValueAsString(request.getEscolarizacao()));
+            lessonPlan.setAgeRanges(objectMapper.writeValueAsString(request.getFaixas()));
+            lessonPlan.setLifeContexts(objectMapper.writeValueAsString(request.getContextos()));
+            lessonPlan.setProfessionalAreas(objectMapper.writeValueAsString(request.getProfissoes()));
+            lessonPlan.setOtherProfiles(objectMapper.writeValueAsString(request.getOutrosPerfis()));
+        } catch (JsonProcessingException e) {
+            lessonPlan.setEducationLevels("[]");
+            lessonPlan.setAgeRanges("[]");
+            lessonPlan.setLifeContexts("[]");
+            lessonPlan.setProfessionalAreas("[]");
+            lessonPlan.setOtherProfiles("[]");
+        }
+        lessonPlan.setObservations(request.getObservacoes());
+        lessonPlan.setGeneratedContent(generatedContent);
+        lessonPlan.setGenerationTimestamp(LocalDateTime.now());
+
+        LessonPlan savedPlan = lessonPlanService.save(lessonPlan);
+        return new ResponseEntity<>(convertToDto(savedPlan), HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public List<LessonPlanDTO> getAllLessonPlans() {
+        return lessonPlanService.findAll().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<LessonPlanDTO> getLessonPlanById(@PathVariable UUID id) {
+        Optional<LessonPlan> lessonPlan = lessonPlanService.findById(id);
+        return lessonPlan.map(lp -> ResponseEntity.ok(convertToDto(lp)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<LessonPlanDTO> createLessonPlan(@RequestBody LessonPlanDTO lessonPlanDTO) {
+        try {
+            LessonPlan lessonPlan = convertToEntity(lessonPlanDTO);
+            LessonPlan savedLessonPlan = lessonPlanService.save(lessonPlan);
+            return new ResponseEntity<>(convertToDto(savedLessonPlan), HttpStatus.CREATED);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<LessonPlanDTO> updateLessonPlan(@PathVariable UUID id, @RequestBody LessonPlanDTO lessonPlanDTO) {
+        Optional<LessonPlan> existingLessonPlan = lessonPlanService.findById(id);
+        if (existingLessonPlan.isPresent()) {
+            try {
+                LessonPlan lessonPlan = existingLessonPlan.get();
+                // Update fields from DTO
+                lessonPlan.setDiscipline(lessonPlanDTO.getDiscipline());
+                lessonPlan.setLevel(lessonPlanDTO.getLevel());
+                lessonPlan.setTheme(lessonPlanDTO.getTheme());
+                lessonPlan.setDurationMinutes(lessonPlanDTO.getDurationMinutes());
+                lessonPlan.setQuantity(lessonPlanDTO.getQuantity());
+                lessonPlan.setResources(objectMapper.writeValueAsString(lessonPlanDTO.getResources()));
+                lessonPlan.setClassSize(lessonPlanDTO.getClassSize());
+                lessonPlan.setEducationLevels(objectMapper.writeValueAsString(lessonPlanDTO.getEducationLevels()));
+                lessonPlan.setAgeRanges(objectMapper.writeValueAsString(lessonPlanDTO.getAgeRanges()));
+                lessonPlan.setLifeContexts(objectMapper.writeValueAsString(lessonPlanDTO.getLifeContexts()));
+                lessonPlan.setProfessionalAreas(objectMapper.writeValueAsString(lessonPlanDTO.getProfessionalAreas()));
+                lessonPlan.setOtherProfiles(objectMapper.writeValueAsString(lessonPlanDTO.getOtherProfiles()));
+                lessonPlan.setObservations(lessonPlanDTO.getObservations());
+                lessonPlan.setGeneratedContent(lessonPlanDTO.getGeneratedContent());
+
+                // Handle user and class profile relationships
+                if (lessonPlanDTO.getUserId() != null) {
+                    userService.findById(lessonPlanDTO.getUserId()).ifPresent(lessonPlan::setUser);
+                }
+                if (lessonPlanDTO.getClassProfileId() != null) {
+                    classProfileService.findById(lessonPlanDTO.getClassProfileId()).ifPresent(lessonPlan::setClassProfile);
+                }
+
+                LessonPlan updatedLessonPlan = lessonPlanService.save(lessonPlan);
+                return ResponseEntity.ok(convertToDto(updatedLessonPlan));
+            } catch (JsonProcessingException e) {
+                return ResponseEntity.badRequest().build();
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteLessonPlan(@PathVariable UUID id) {
+        if (lessonPlanService.findById(id).isPresent()) {
+            lessonPlanService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    private LessonPlanDTO convertToDto(LessonPlan lessonPlan) {
+        LessonPlanDTO dto = new LessonPlanDTO();
+        dto.setId(lessonPlan.getId());
+        dto.setUserId(lessonPlan.getUser().getId());
+        dto.setDiscipline(lessonPlan.getDiscipline());
+        dto.setLevel(lessonPlan.getLevel());
+        dto.setTheme(lessonPlan.getTheme());
+        dto.setDurationMinutes(lessonPlan.getDurationMinutes());
+        dto.setQuantity(lessonPlan.getQuantity());
+        try {
+            dto.setResources(objectMapper.readValue(lessonPlan.getResources(), List.class));
+        } catch (JsonProcessingException e) {
+            dto.setResources(List.of());
+        }
+        if (lessonPlan.getClassProfile() != null) {
+            dto.setClassProfileId(lessonPlan.getClassProfile().getId());
+        }
+        dto.setClassSize(lessonPlan.getClassSize());
+        try {
+            dto.setEducationLevels(objectMapper.readValue(lessonPlan.getEducationLevels(), List.class));
+            dto.setAgeRanges(objectMapper.readValue(lessonPlan.getAgeRanges(), List.class));
+            dto.setLifeContexts(objectMapper.readValue(lessonPlan.getLifeContexts(), List.class));
+            dto.setProfessionalAreas(objectMapper.readValue(lessonPlan.getProfessionalAreas(), List.class));
+            dto.setOtherProfiles(objectMapper.readValue(lessonPlan.getOtherProfiles(), List.class));
+        } catch (JsonProcessingException e) {
+            dto.setEducationLevels(List.of());
+            dto.setAgeRanges(List.of());
+            dto.setLifeContexts(List.of());
+            dto.setProfessionalAreas(List.of());
+            dto.setOtherProfiles(List.of());
+        }
+        dto.setObservations(lessonPlan.getObservations());
+        dto.setGeneratedContent(lessonPlan.getGeneratedContent());
+        dto.setGenerationTimestamp(lessonPlan.getGenerationTimestamp());
+        return dto;
+    }
+
+    private LessonPlan convertToEntity(LessonPlanDTO dto) throws JsonProcessingException {
+        LessonPlan lessonPlan = new LessonPlan();
+        if (dto.getId() != null) {
+            lessonPlan.setId(dto.getId());
+        }
+        User user = userService.findById(dto.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        lessonPlan.setUser(user);
+        lessonPlan.setDiscipline(dto.getDiscipline());
+        lessonPlan.setLevel(dto.getLevel());
+        lessonPlan.setTheme(dto.getTheme());
+        lessonPlan.setDurationMinutes(dto.getDurationMinutes());
+        lessonPlan.setQuantity(dto.getQuantity());
+        lessonPlan.setResources(objectMapper.writeValueAsString(dto.getResources()));
+        if (dto.getClassProfileId() != null) {
+            classProfileService.findById(dto.getClassProfileId()).ifPresent(lessonPlan::setClassProfile);
+        }
+        lessonPlan.setClassSize(dto.getClassSize());
+        lessonPlan.setEducationLevels(objectMapper.writeValueAsString(dto.getEducationLevels()));
+        lessonPlan.setAgeRanges(objectMapper.writeValueAsString(dto.getAgeRanges()));
+        lessonPlan.setLifeContexts(objectMapper.writeValueAsString(dto.getLifeContexts()));
+        lessonPlan.setProfessionalAreas(objectMapper.writeValueAsString(dto.getProfessionalAreas()));
+        lessonPlan.setOtherProfiles(objectMapper.writeValueAsString(dto.getOtherProfiles()));
+        lessonPlan.setObservations(dto.getObservations());
+        lessonPlan.setGeneratedContent(dto.getGeneratedContent());
+        lessonPlan.setGenerationTimestamp(dto.getGenerationTimestamp());
+        return lessonPlan;
     }
 }

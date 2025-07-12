@@ -19,6 +19,7 @@ public class LessonPlanRequest {
     private Boolean salvarPerfil;
     private String nomePerfil;
 
+    // Getters and Setters
     public String getDisciplina() {
         return disciplina;
     }
