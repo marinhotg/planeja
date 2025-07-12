@@ -39,6 +39,14 @@ export interface GeneratedLessonPlan {
   observations: string;
   generatedContent: string; // This will be a JSON string
   generationTimestamp: string;
+  rating?: number;
+  feedbackText?: string;
+}
+
+export interface FeedbackRequest {
+  planId: string;
+  rating: number;
+  comment: string;
 }
 
 export interface ParsedGeneratedContent {
@@ -155,4 +163,6 @@ export const fetchConfigurations = async (): Promise<ConfigurationResponse> => {
   return response.data;
 };
 
-export default api;
+export const submitFeedback = async (feedbackData: FeedbackRequest): Promise<void> => {
+  await api.put(`/api/lesson-plans/${feedbackData.planId}/feedback`, { rating: feedbackData.rating, feedbackText: feedbackData.comment });
+};

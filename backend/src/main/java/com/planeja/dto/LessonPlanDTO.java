@@ -23,6 +23,8 @@ public class LessonPlanDTO {
     private String observations;
     private String generatedContent;
     private LocalDateTime generationTimestamp;
+    private Integer rating;
+    private String feedbackText;
 
     // Getters and Setters
     public UUID getId() {
@@ -167,5 +169,21 @@ public class LessonPlanDTO {
 
     public void setGenerationTimestamp(LocalDateTime generationTimestamp) {
         this.generationTimestamp = generationTimestamp;
+    }
+
+    public Integer getRating() {
+        return rating;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    public String getFeedbackText() {
+        return feedbackText;
+    }
+
+    public void setFeedbackText(String feedbackText) {
+        this.feedbackText = feedbackText;
     }
 }

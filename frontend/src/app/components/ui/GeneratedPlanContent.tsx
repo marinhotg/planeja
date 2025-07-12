@@ -1,10 +1,10 @@
-use client";
+"use client";
 
 import PageTitle from "./PageTitle";
 import Image from "next/image";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchLessonPlanById, deleteLessonPlan, GeneratedLessonPlan, ParsedGeneratedContent } from '@/lib/api';
+import { fetchLessonPlanById, deleteLessonPlan, GeneratedLessonPlan, ParsedGeneratedContent, submitFeedback } from '@/lib/api';
 
 export default function GeneratedPlanContent() {
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedLessonPlan | null>(null);
@@ -118,10 +118,14 @@ export default function GeneratedPlanContent() {
     };
 
     console.log("Enviando feedback:", feedbackData);
-    // TODO: Implement actual feedback submission to backend
-    // await submitFeedback(feedbackData); // This function needs to be created in api.ts
-
-    setIsFeedbackSubmitted(true);
+    try {
+      await submitFeedback(feedbackData);
+      alert("Feedback enviado com sucesso!");
+      setIsFeedbackSubmitted(true);
+    } catch (error) {
+      console.error("Erro ao enviar feedback:", error);
+      alert("Erro ao enviar feedback. Por favor, tente novamente.");
+    }
   };
 
   return (

@@ -70,6 +70,11 @@ public class LessonPlan {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    private Integer rating;
+
+    @Column(columnDefinition = "TEXT")
+    private String feedbackText;
+
     // Constructors
     public LessonPlan() {
         this.generationTimestamp = LocalDateTime.now();
@@ -236,6 +241,22 @@ public class LessonPlan {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Integer getRating() {
+        return rating;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    public String getFeedbackText() {
+        return feedbackText;
+    }
+
+    public void setFeedbackText(String feedbackText) {
+        this.feedbackText = feedbackText;
     }
 
     @PreUpdate

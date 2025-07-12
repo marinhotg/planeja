@@ -168,6 +168,24 @@ public class LessonPlanController {
         }
     }
 
+    @PutMapping("/{id}/feedback")
+    public ResponseEntity<LessonPlanDTO> submitFeedback(@PathVariable UUID id, @RequestBody LessonPlanDTO lessonPlanDTO) {
+        Optional<LessonPlan> existingLessonPlan = lessonPlanService.findById(id);
+        if (existingLessonPlan.isPresent()) {
+            LessonPlan lessonPlan = existingLessonPlan.get();
+            if (lessonPlanDTO.getRating() != null) {
+                lessonPlan.setRating(lessonPlanDTO.getRating());
+            }
+            if (lessonPlanDTO.getFeedbackText() != null) {
+                lessonPlan.setFeedbackText(lessonPlanDTO.getFeedbackText());
+            }
+            LessonPlan updatedLessonPlan = lessonPlanService.save(lessonPlan);
+            return ResponseEntity.ok(convertToDto(updatedLessonPlan));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     private LessonPlanDTO convertToDto(LessonPlan lessonPlan) {
         LessonPlanDTO dto = new LessonPlanDTO();
         dto.setId(lessonPlan.getId());
@@ -231,6 +249,8 @@ public class LessonPlanController {
         lessonPlan.setObservations(dto.getObservations());
         lessonPlan.setGeneratedContent(dto.getGeneratedContent());
         lessonPlan.setGenerationTimestamp(dto.getGenerationTimestamp());
+        lessonPlan.setRating(dto.getRating());
+        lessonPlan.setFeedbackText(dto.getFeedbackText());
         return lessonPlan;
     }
 }
