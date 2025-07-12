@@ -2,13 +2,13 @@ import Image from "next/image";
 import React from 'react';
 
 interface PlanCardProps {
-  id: number;
+  id: string; // Changed from number to string
   title: string;
   subtitle: string;
-  onView: (id: number) => void;
-  onDownload: (id: number) => void;
-  onDelete: (id: number) => void;
-  onFavorite: (id: number) => void;
+  onView: (id: string) => void; // Changed from number to string
+  onDownload: (id: string) => void; // Changed from number to string
+  onDelete: (id: string) => void; // Changed from number to string
+  onFavorite: (id: string) => void; // Changed from number to string
   favorited: boolean;
 }
 

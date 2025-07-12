@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from "../layout/Navbar";
 import PageTitle from "./PageTitle";
 import Button from "./Button";
@@ -8,6 +8,8 @@ import InputLabel from "./InputLabel";
 import TextInput from "./TextInput";
 import ProfileSelectionModal from './ProfileSelectionModal';
 import { useRouter } from 'next/navigation';
+import { fetchConfigurations, ConfigurationResponse } from '@/lib/api';
+import { UIClassProfile, isCompleteProfile } from '@/types/profile';
 
 export default function ClassProfileForm() {
   const [classSize, setClassSize] = useState<number | null>(null);
@@ -19,50 +21,33 @@ export default function ClassProfileForm() {
   const [saveProfile, setSaveProfile] = useState(false);
   const [profileNameInput, setProfileNameInput] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [configurations, setConfigurations] = useState<ConfigurationResponse | null>(null);
+  const [loadingConfigs, setLoadingConfigs] = useState(true);
+  const [errorConfigs, setErrorConfigs] = useState<string | null>(null);
 
   const router = useRouter();
 
-  const educationLevels = [
-    'Reintegração escolar',
-    'Multissérie',
-    'Interesse em temas práticos',
-    'Alfabetização',
-    'Experiência com tecnologia',
-  ];
+  useEffect(() => {
+    const loadConfigurations = async () => {
+      try {
+        setLoadingConfigs(true);
+        const configs = await fetchConfigurations();
+        setConfigurations(configs);
+      } catch (err) {
+        setErrorConfigs('Failed to load configurations.');
+        console.error(err);
+      } finally {
+        setLoadingConfigs(false);
+      }
+    };
+    loadConfigurations();
+  }, []);
 
-  const ageRanges = [
-    'Jovens (15 a 24 anos)',
-    'Adultos (25 a 59 anos)',
-    'Idosos (60+ anos)',
-  ];
-
-  const lifeContexts = [
-    'Trabalhadores noturnos',
-    'Desempregados',
-    'Mães',
-    'Pais',
-    'Cuidadores familiares',
-    'Migrantes/recém-chegados',
-  ];
-
-  const professionalAreas = [
-    'Comércio e Vendas',
-    'Construção Civil',
-    'Transporte e Logística',
-    'Serviços Gerais',
-    'Alimentação',
-    'Agricultura',
-    'Cuidado e Saúde',
-    'Administração / Escritório',
-  ];
-
-  const otherProfiles = [
-    'Pessoas com deficiência',
-    'Povos originários',
-    'Pessoas privadas de liberdade',
-    'Refugiados',
-    'Estrangeiros',
-  ];
+  const educationLevels = configurations?.educationLevels || [];
+  const ageRanges = configurations?.ageRanges || [];
+  const lifeContexts = configurations?.lifeContexts || [];
+  const professionalAreas = configurations?.professionalAreas || [];
+  const otherProfiles = configurations?.otherProfiles || [];
 
   const handleMultiSelectChange = (setter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
     setter((prev) =>
@@ -81,15 +66,21 @@ export default function ClassProfileForm() {
     setProfileNameInput('');
   };
 
-  const handleSelectProfile = (profile: ClassProfile) => {
-    setClassSize(profile.size);
-    setSelectedEducationLevels(profile.education);
-    setSelectedAgeRanges(profile.age);
-    setSelectedLifeContexts(profile.life);
-    setSelectedProfessionalAreas(profile.professional);
-    setSelectedOtherProfiles(profile.other);
-    setProfileNameInput(profile.name);
-    setSaveProfile(true); // Assume if a profile is loaded, it should be saved
+  // Função handleSelectProfile usando o type guard compartilhado
+  const handleSelectProfile = (profile: UIClassProfile) => {
+    if (isCompleteProfile(profile)) {
+      setClassSize(profile.size || null);
+      setSelectedEducationLevels(profile.educationLevels || []);
+      setSelectedAgeRanges(profile.ageRanges || []);
+      setSelectedLifeContexts(profile.lifeContexts || []);
+      setSelectedProfessionalAreas(profile.professionalAreas || []);
+      setSelectedOtherProfiles(profile.otherProfiles || []);
+      setProfileNameInput(profile.profileName);
+      setSaveProfile(true);
+    } else {
+      console.error('Profile is missing userId or profileName properties', profile);
+      alert('Erro: Perfil inválido selecionado. Verifique se o perfil contém todas as informações necessárias.');
+    }
   };
 
   const handleAdvance = () => {
@@ -111,6 +102,14 @@ export default function ClassProfileForm() {
     sessionStorage.setItem('lessonPlanProfile', JSON.stringify(classProfileData));
     router.push('/observations');
   };
+
+  if (loadingConfigs) {
+    return <p className="text-center text-gray-500 w-full">Loading configurations...</p>;
+  }
+
+  if (errorConfigs) {
+    return <p className="text-center text-red-500 w-full">Error: {errorConfigs}</p>;
+  }
 
   return (
     <>

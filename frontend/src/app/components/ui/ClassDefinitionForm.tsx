@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from "../layout/Navbar";
 import PageTitle from "./PageTitle";
 import Button from "./Button";
 import InputLabel from "./InputLabel";
 import TextInput from "./TextInput";
 import { useRouter } from 'next/navigation';
+import { fetchConfigurations, ConfigurationResponse } from '@/lib/api';
 
 export default function ClassDefinitionForm() {
   const [selectedDiscipline, setSelectedDiscipline] = useState<string | null>(null);
@@ -15,29 +16,32 @@ export default function ClassDefinitionForm() {
   const [classDuration, setClassDuration] = useState<number | null>(null);
   const [classQuantity, setClassQuantity] = useState<number | null>(null);
   const [selectedResources, setSelectedResources] = useState<string[]>([]);
+  const [configurations, setConfigurations] = useState<ConfigurationResponse | null>(null); // Store fetched configurations
+  const [loadingConfigs, setLoadingConfigs] = useState(true);
+  const [errorConfigs, setErrorConfigs] = useState<string | null>(null);
 
   const router = useRouter();
 
-  const disciplines = ['Matemática', 'Português', 'História', 'Geografia', 'Ciências', 'Artes', 'Educação Física'];
-  const levels = ['Nível I', 'Nível II', 'Nível III'];
-  const resources = [
-    'Quadro e giz/lousa',
-    'Projetor',
-    'TV/DVD',
-    'Livros',
-    'Computadores',
-    'Papel e canetas',
-  ];
+  useEffect(() => {
+    const loadConfigurations = async () => {
+      try {
+        setLoadingConfigs(true);
+        const configs = await fetchConfigurations();
+        setConfigurations(configs);
+      } catch (err) {
+        setErrorConfigs('Failed to load configurations.');
+        console.error(err);
+      } finally {
+        setLoadingConfigs(false);
+      }
+    };
+    loadConfigurations();
+  }, []);
 
-  const themesByDiscipline: { [key: string]: string[] } = {
-    'Matemática': ['Álgebra', 'Geometria', 'Cálculo'],
-    'Português': ['Gramática', 'Literatura', 'Redação'],
-    'História': ['Antiguidade', 'Idade Média', 'Brasil Colonial'],
-    'Geografia': ['Geografia Física', 'Geografia Humana', 'Cartografia'],
-    'Ciências': ['Biologia', 'Química', 'Física'],
-    'Artes': ['Pintura', 'Escultura', 'Música'],
-    'Educação Física': ['Esportes', 'Dança', 'Saúde'],
-  };
+  const disciplines = configurations?.disciplines || [];
+  const levels = configurations?.levels || [];
+  const resources = configurations?.resources || [];
+  const themesByDiscipline = configurations?.themesByDiscipline || {};
 
   const handleResourceChange = (resource: string) => {
     setSelectedResources((prev) =>
@@ -66,6 +70,14 @@ export default function ClassDefinitionForm() {
     sessionStorage.setItem('lessonPlanDefinition', JSON.stringify(classDefinitionData));
     router.push('/class-profile');
   };
+
+  if (loadingConfigs) {
+    return <p className="text-center text-gray-500 w-full">Loading configurations...</p>;
+  }
+
+  if (errorConfigs) {
+    return <p className="text-center text-red-500 w-full">Error: {errorConfigs}</p>;
+  }
 
   return (
     <>

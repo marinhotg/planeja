@@ -4,20 +4,23 @@ import PageTitle from "./PageTitle";
 import Button from "./Button";
 import PlanCard from "./PlanCard";
 import { useRouter } from 'next/navigation';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import FilterBox from "./FilterBox";
+import { fetchLessonPlans, deleteLessonPlan, ParsedGeneratedContent } from '@/lib/api';
+
+interface DisplayPlan {
+  id: string;
+  title: string;
+  subtitle: string;
+  discipline: string;
+  date: string;
+  favorited: boolean; // Assuming favorited is a local state for now
+}
 
 export default function DashboardContent() {
-  // Mock data for demonstration
-  const [plans, setPlans] = useState([
-    { id: 1, title: 'Plano de Matemática - Nível I', subtitle: 'Álgebra', discipline: 'Matemática', date: '2024-01-15', favorited: false },
-    { id: 2, title: 'Plano de Português - Nível II', subtitle: 'Gramática', discipline: 'Português', date: '2024-02-20', favorited: true },
-    { id: 3, title: 'Plano de História - Nível III', subtitle: 'Antiguidade', discipline: 'História', date: '2024-03-10', favorited: false },
-    { id: 4, title: 'Plano de Ciências - Nível I', subtitle: 'Biologia', discipline: 'Ciências', date: '2024-04-05', favorited: true },
-    { id: 5, title: 'Plano de Artes - Nível II', subtitle: 'Pintura', discipline: 'Artes', date: '2024-05-01', favorited: false },
-    { id: 6, title: 'Plano de Educação Física - Nível III', subtitle: 'Esportes', discipline: 'Educação Física', date: '2024-06-12', favorited: false },
-  ]);
-
+  const [plans, setPlans] = useState<DisplayPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const [selectedDisciplineFilter, setSelectedDisciplineFilter] = useState<string>('');
@@ -27,23 +30,69 @@ export default function DashboardContent() {
 
   const disciplines = ['Matemática', 'Português', 'História', 'Geografia', 'Ciências', 'Artes', 'Educação Física'];
 
-  const handleView = (id: number) => {
-    console.log(`Visualizar plano ${id}`);
+  useEffect(() => {
+    const loadLessonPlans = async () => {
+      try {
+        setLoading(true);
+        const fetchedPlans = await fetchLessonPlans();
+        const displayPlans: DisplayPlan[] = fetchedPlans.map(plan => {
+          let parsedContent: ParsedGeneratedContent | null = null;
+          try {
+            parsedContent = JSON.parse(plan.generatedContent);
+          } catch (e) {
+            console.error("Failed to parse generatedContent for plan", plan.id, e);
+          }
+
+          return {
+            id: plan.id,
+            title: parsedContent?.title || plan.theme, // Use parsed title or theme as fallback
+            subtitle: plan.level, // Using level as subtitle for now
+            discipline: plan.discipline,
+            date: new Date(plan.generationTimestamp).toLocaleDateString(),
+            favorited: false, // Assuming false for now, as no backend field for this
+          };
+        });
+        setPlans(displayPlans);
+      } catch (err) {
+        setError('Failed to load lesson plans.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadLessonPlans();
+  }, []);
+
+  const handleView = (id: string) => {
+    // Store the ID in session storage so GeneratedPlanContent can fetch it
+    sessionStorage.setItem('generatedLessonPlan', JSON.stringify({ id: id }));
     router.push('/generated-plan');
   };
 
-  const handleDownload = (id: number) => {
+  const handleDownload = (id: string) => {
     console.log(`Baixar plano ${id}`);
+    alert("Download functionality not yet implemented.");
   };
 
-  const handleDelete = (id: number) => {
-    console.log(`Deletar plano ${id}`);
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this lesson plan?')) {
+      try {
+        await deleteLessonPlan(id);
+        setPlans(plans.filter(plan => plan.id !== id));
+      } catch (err) {
+        alert('Failed to delete lesson plan.');
+        console.error(err);
+      }
+    }
   };
 
-  const handleFavorite = (id: number) => {
+  const handleFavorite = (id: string) => {
+    console.log(`Favoritar plano ${id}`);
+    // For now, favorited is a local state. If persistence is needed, update backend.
     setPlans(plans.map(plan =>
       plan.id === id ? { ...plan, favorited: !plan.favorited } : plan
     ));
+    alert("Favorite functionality is local only. Not persisted to backend.");
   };
 
   const handleGenerateNewPlan = () => {
@@ -70,6 +119,14 @@ export default function DashboardContent() {
       return 0;
     });
   }, [plans, selectedDisciplineFilter, showFavoritesOnly, sortBy]);
+
+  if (loading) {
+    return <p className="text-center text-gray-500 w-full">Loading lesson plans...</p>;
+  }
+
+  if (error) {
+    return <p className="text-center text-red-500 w-full">Error: {error}</p>;
+  }
 
   return (
     <>

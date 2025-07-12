@@ -5,7 +5,7 @@ import Navbar from "../layout/Navbar";
 import PageTitle from "./PageTitle";
 import Button from "./Button";
 import { useRouter } from 'next/navigation';
-import { generateLessonPlan } from '@/lib/api';
+import { generateLessonPlan, saveLessonPlan, LessonPlanRequest, GeneratedLessonPlan } from '@/lib/api';
 
 export default function ObservationsForm() {
   const [observations, setObservations] = useState('');
@@ -22,18 +22,40 @@ export default function ObservationsForm() {
       const definitionData = JSON.parse(sessionStorage.getItem('lessonPlanDefinition') || '{}');
       const profileData = JSON.parse(sessionStorage.getItem('lessonPlanProfile') || '{}');
 
-      const lessonPlanRequest = {
+      const lessonPlanRequest: LessonPlanRequest = {
         ...definitionData,
         ...profileData,
         observacoes: observations,
       };
 
+      // Generate the lesson plan
       const generatedPlan = await generateLessonPlan(lessonPlanRequest);
-      sessionStorage.setItem('generatedLessonPlan', JSON.stringify(generatedPlan));
+      
+      // Prepare data for saving to the database
+      const lessonPlanToSave: GeneratedLessonPlan = {
+        ...generatedPlan,
+        // In a real application, userId should come from an authentication system
+        userId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", // Hardcoded for testing with DataLoader
+        // Ensure all fields expected by the backend are present, even if empty
+        classProfileId: generatedPlan.classProfileId || undefined,
+        classSize: generatedPlan.classSize || undefined,
+        educationLevels: generatedPlan.educationLevels || [],
+        ageRanges: generatedPlan.ageRanges || [],
+        lifeContexts: generatedPlan.lifeContexts || [],
+        professionalAreas: generatedPlan.professionalAreas || [],
+        otherProfiles: generatedPlan.otherProfiles || [],
+        generatedContent: JSON.stringify(generatedPlan), // Store the full generated plan as JSON string
+      };
+
+      // Save the generated lesson plan to the database
+      const savedLessonPlan = await saveLessonPlan(lessonPlanToSave);
+      
+      // Store the saved plan (which now has an ID from the DB) in session storage
+      sessionStorage.setItem('generatedLessonPlan', JSON.stringify(savedLessonPlan));
       router.push('/generated-plan');
     } catch (error) {
-      alert('Erro ao gerar plano de aula. Por favor, tente novamente.');
-      console.error('Failed to generate lesson plan:', error);
+      alert('Erro ao gerar ou salvar plano de aula. Por favor, tente novamente.');
+      console.error('Failed to generate or save lesson plan:', error);
     } finally {
       setLoading(false);
     }
