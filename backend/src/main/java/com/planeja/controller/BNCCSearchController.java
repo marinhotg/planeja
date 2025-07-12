@@ -22,11 +22,11 @@ public class BNCCSearchController {
 
     @PostMapping("/search")
     public List<BNCCContent> search(@RequestBody BNCCSearchRequest request) {
-        return bnccSearchService.searchWithFilters(request.getQuery(), request.getArea(), request.getEtapa(), request.getTopK());
+        return bnccSearchService.searchWithFilters(request.getQuery(), request.getArea(), request.getEtapa(), null, request.getTopK());
     }
 
     @PostMapping("/search/eja")
     public List<BNCCContent> searchEJA(@RequestBody BNCCSearchRequest request) {
-        return bnccSearchService.searchForEJA(request.getQuery(), request.getArea(), request.getEtapa());
+        return bnccSearchService.searchForEJA(request.getQuery(), request.getArea(), request.getEtapa(), null);
     }
 }

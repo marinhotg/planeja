@@ -37,9 +37,9 @@ public class BNCCSearchService {
         this.objectMapper = new ObjectMapper();
     }
 
-    public List<BNCCContent> searchWithFilters(String query, String area, String etapa, int topK) {
+    public List<BNCCContent> searchWithFilters(String query, String area, String etapa, List<String> anos, int topK) {
         long startTime = System.currentTimeMillis();
-        logger.info("Executing search with query: '{}', area: '{}', etapa: '{}', topK: {}", query, area, etapa, topK);
+        logger.info("Executing search with query: '{}', area: '{}', etapa: '{}', anos: {}, topK: {}", query, area, etapa, anos, topK);
 
         try {
             List<Double> embeddingDouble = embeddingClient.embed(query);
@@ -58,14 +58,17 @@ public class BNCCSearchService {
             requestBody.put("topK", topK);
             requestBody.put("includeMetadata", true);
 
-            if (area != null || etapa != null) {
-                Map<String, Object> filter = new java.util.HashMap<>();
-                if (area != null) {
-                    filter.put("area", area);
-                }
-                if (etapa != null) {
-                    filter.put("etapa", etapa);
-                }
+            Map<String, Object> filter = new java.util.HashMap<>();
+            if (area != null) {
+                filter.put("area", area);
+            }
+            if (etapa != null) {
+                filter.put("etapa", etapa);
+            }
+            if (anos != null && !anos.isEmpty()) {
+                filter.put("ano", Map.of("$in", anos));
+            }
+            if (!filter.isEmpty()) {
                 requestBody.put("filter", filter);
             }
 
@@ -92,8 +95,8 @@ public class BNCCSearchService {
         }
     }
 
-    public List<BNCCContent> searchForEJA(String query, String disciplina, String nivelEnsino) {
-        return searchWithFilters(query, disciplina, nivelEnsino, 10);
+    public List<BNCCContent> searchForEJA(String query, String disciplina, String nivelEnsino, List<String> anos) {
+        return searchWithFilters(query, disciplina, nivelEnsino, anos, 100);
     }
 
     private BNCCContent toBNCCContent(JsonNode matchNode) {

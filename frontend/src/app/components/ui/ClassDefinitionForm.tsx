@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from "../layout/Navbar";
 import PageTitle from "./PageTitle";
 import Button from "./Button";
 import InputLabel from "./InputLabel";
 import TextInput from "./TextInput";
 import { useRouter } from 'next/navigation';
+import { fetchConfigurations, ConfigurationResponse } from '@/lib/api';
+import MultiSelectButtons from "./MultiSelectButtons";
 
 export default function ClassDefinitionForm() {
   const [selectedDiscipline, setSelectedDiscipline] = useState<string | null>(null);
@@ -15,34 +17,45 @@ export default function ClassDefinitionForm() {
   const [classDuration, setClassDuration] = useState<number | null>(null);
   const [classQuantity, setClassQuantity] = useState<number | null>(null);
   const [selectedResources, setSelectedResources] = useState<string[]>([]);
+  const [configurations, setConfigurations] = useState<ConfigurationResponse | null>(null); // Store fetched configurations
+  const [loadingConfigs, setLoadingConfigs] = useState(true);
+  const [errorConfigs, setErrorConfigs] = useState<string | null>(null);
 
   const router = useRouter();
 
-  const disciplines = ['Matemática', 'Português', 'História', 'Geografia', 'Ciências', 'Artes', 'Educação Física'];
-  const levels = ['Nível I', 'Nível II', 'Nível III'];
-  const resources = [
-    'Quadro e giz/lousa',
-    'Projetor',
-    'TV/DVD',
-    'Livros',
-    'Computadores',
-    'Papel e canetas',
-  ];
+  useEffect(() => {
+    const loadConfigurations = async () => {
+      try {
+        setLoadingConfigs(true);
+        const configs = await fetchConfigurations();
+        setConfigurations(configs);
+      } catch (err) {
+        setErrorConfigs('Failed to load configurations.');
+        console.error(err);
+      } finally {
+        setLoadingConfigs(false);
+      }
+    };
+    loadConfigurations();
+  }, []);
 
-  const themesByDiscipline: { [key: string]: string[] } = {
-    'Matemática': ['Álgebra', 'Geometria', 'Cálculo'],
-    'Português': ['Gramática', 'Literatura', 'Redação'],
-    'História': ['Antiguidade', 'Idade Média', 'Brasil Colonial'],
-    'Geografia': ['Geografia Física', 'Geografia Humana', 'Cartografia'],
-    'Ciências': ['Biologia', 'Química', 'Física'],
-    'Artes': ['Pintura', 'Escultura', 'Música'],
-    'Educação Física': ['Esportes', 'Dança', 'Saúde'],
-  };
+  const disciplines = configurations?.disciplines || [];
+  const levels = configurations?.levels || [];
+  const resources = configurations?.resources || [];
+  const themesByDiscipline = configurations?.themesByDiscipline || {};
 
   const handleResourceChange = (resource: string) => {
     setSelectedResources((prev) =>
       prev.includes(resource) ? prev.filter((r) => r !== resource) : [...prev, resource]
     );
+  };
+
+  const handleAddNewResource = (resource: string) => {
+    if (configurations) {
+      const newResources = [...configurations.resources, resource];
+      setConfigurations({ ...configurations, resources: newResources });
+      setSelectedResources([...selectedResources, resource]);
+    }
   };
 
   const handleClear = () => {
@@ -55,9 +68,25 @@ export default function ClassDefinitionForm() {
   };
 
   const handleAdvance = () => {
-    // Logic to save class definition data if needed
+    const classDefinitionData = {
+      disciplina: selectedDiscipline,
+      nivel: selectedLevel,
+      tema: selectedClassTheme,
+      duracao: classDuration,
+      quantidade: classQuantity,
+      recursos: selectedResources,
+    };
+    sessionStorage.setItem('lessonPlanDefinition', JSON.stringify(classDefinitionData));
     router.push('/class-profile');
   };
+
+  if (loadingConfigs) {
+    return <p className="text-center text-gray-500 w-full">Loading configurations...</p>;
+  }
+
+  if (errorConfigs) {
+    return <p className="text-center text-red-500 w-full">Error: {errorConfigs}</p>;
+  }
 
   return (
     <>
@@ -161,21 +190,13 @@ export default function ClassDefinitionForm() {
         </div>
         <div className="self-stretch border-b border-gray-200 my-2"></div>
 
-        {/* Recursos disponíveis */}
-        <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel>Recursos disponíveis</InputLabel>
-          <div className="flex flex-wrap gap-2">
-            {resources.map((resource) => (
-              <button
-                key={resource}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedResources.includes(resource) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
-                onClick={() => handleResourceChange(resource)}
-              >
-                {resource}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelectButtons
+          label="Recursos disponíveis"
+          options={resources}
+          selectedOptions={selectedResources}
+          onChange={handleResourceChange}
+          onAddNewOption={handleAddNewResource}
+        />
 
       <Button className="w-full mt-8" onClick={handleAdvance}>Avançar</Button>
       </div>

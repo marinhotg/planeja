@@ -1,107 +1,266 @@
 package com.planeja.model;
 
-import java.util.List;
-import java.util.ArrayList;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
+@Entity
+@Table(name = "lesson_plans")
 public class LessonPlan {
 
-    private String titulo;
-    private String objetivoGeral;
-    private List<String> habilidadesTrabalhadas;
-    private String metodologia;
-    private List<Atividade> atividades;
-    private List<String> recursosNecessarios;
-    private String metodosDeAvaliacao;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(nullable = false)
+    private String discipline;
+
+    @Column(nullable = false)
+    private String level;
+
+    @Column(nullable = false)
+    private String theme;
+
+    @Column(nullable = false)
+    private Integer durationMinutes;
+
+    @Column(nullable = false)
+    private Integer quantity;
+
+    @Column(columnDefinition = "TEXT")
+    private String resources;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "class_profile_id")
+    private ClassProfile classProfile;
+
+    private Integer classSize;
+
+    @Column(columnDefinition = "TEXT")
+    private String educationLevels;
+
+    @Column(columnDefinition = "TEXT")
+    private String ageRanges;
+
+    @Column(columnDefinition = "TEXT")
+    private String lifeContexts;
+
+    @Column(columnDefinition = "TEXT")
+    private String professionalAreas;
+
+    @Column(columnDefinition = "TEXT")
+    private String otherProfiles;
+
+    @Column(columnDefinition = "TEXT")
+    private String observations;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String generatedContent;
+
+    @Column(nullable = false)
+    private LocalDateTime generationTimestamp;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    private Integer rating;
+
+    @Column(columnDefinition = "TEXT")
+    private String feedbackText;
+
+    // Constructors
     public LessonPlan() {
-        this.habilidadesTrabalhadas = new ArrayList<>();
-        this.atividades = new ArrayList<>();
-        this.recursosNecessarios = new ArrayList<>();
+        this.generationTimestamp = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public String getTitulo() {
-        return titulo != null ? titulo : "";
+    // Getters and Setters
+    public UUID getId() {
+        return id;
     }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
-    public String getObjetivoGeral() {
-        return objetivoGeral != null ? objetivoGeral : "";
+    public User getUser() {
+        return user;
     }
 
-    public void setObjetivoGeral(String objetivoGeral) {
-        this.objetivoGeral = objetivoGeral;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public List<String> getHabilidadesTrabalhadas() {
-        return habilidadesTrabalhadas != null ? habilidadesTrabalhadas : new ArrayList<>();
+    public String getDiscipline() {
+        return discipline;
     }
 
-    public void setHabilidadesTrabalhadas(List<String> habilidadesTrabalhadas) {
-        this.habilidadesTrabalhadas = habilidadesTrabalhadas != null ? habilidadesTrabalhadas : new ArrayList<>();
+    public void setDiscipline(String discipline) {
+        this.discipline = discipline;
     }
 
-    public String getMetodologia() {
-        return metodologia != null ? metodologia : "";
+    public String getLevel() {
+        return level;
     }
 
-    public void setMetodologia(String metodologia) {
-        this.metodologia = metodologia;
+    public void setLevel(String level) {
+        this.level = level;
     }
 
-    public List<Atividade> getAtividades() {
-        return atividades != null ? atividades : new ArrayList<>();
+    public String getTheme() {
+        return theme;
     }
 
-    public void setAtividades(List<Atividade> atividades) {
-        this.atividades = atividades != null ? atividades : new ArrayList<>();
+    public void setTheme(String theme) {
+        this.theme = theme;
     }
 
-    public List<String> getRecursosNecessarios() {
-        return recursosNecessarios != null ? recursosNecessarios : new ArrayList<>();
+    public Integer getDurationMinutes() {
+        return durationMinutes;
     }
 
-    public void setRecursosNecessarios(List<String> recursosNecessarios) {
-        this.recursosNecessarios = recursosNecessarios != null ? recursosNecessarios : new ArrayList<>();
+    public void setDurationMinutes(Integer durationMinutes) {
+        this.durationMinutes = durationMinutes;
     }
 
-    public String getMetodosDeAvaliacao() {
-        return metodosDeAvaliacao != null ? metodosDeAvaliacao : "";
+    public Integer getQuantity() {
+        return quantity;
     }
 
-    public void setMetodosDeAvaliacao(String metodosDeAvaliacao) {
-        this.metodosDeAvaliacao = metodosDeAvaliacao;
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
-    public static class Atividade {
-        private String titulo;
-        private String descricao;
-        private String duracao;
+    public String getResources() {
+        return resources;
+    }
 
-        public String getTitulo() {
-            return titulo != null ? titulo : "";
-        }
+    public void setResources(String resources) {
+        this.resources = resources;
+    }
 
-        public void setTitulo(String titulo) {
-            this.titulo = titulo;
-        }
+    public ClassProfile getClassProfile() {
+        return classProfile;
+    }
 
-        public String getDescricao() {
-            return descricao != null ? descricao : "";
-        }
+    public void setClassProfile(ClassProfile classProfile) {
+        this.classProfile = classProfile;
+    }
 
-        public void setDescricao(String descricao) {
-            this.descricao = descricao;
-        }
+    public Integer getClassSize() {
+        return classSize;
+    }
 
-        public String getDuracao() {
-            return duracao != null ? duracao : "";
-        }
+    public void setClassSize(Integer classSize) {
+        this.classSize = classSize;
+    }
 
-        public void setDuracao(String duracao) {
-            this.duracao = duracao;
-        }
+    public String getEducationLevels() {
+        return educationLevels;
+    }
+
+    public void setEducationLevels(String educationLevels) {
+        this.educationLevels = educationLevels;
+    }
+
+    public String getAgeRanges() {
+        return ageRanges;
+    }
+
+    public void setAgeRanges(String ageRanges) {
+        this.ageRanges = ageRanges;
+    }
+
+    public String getLifeContexts() {
+        return lifeContexts;
+    }
+
+    public void setLifeContexts(String lifeContexts) {
+        this.lifeContexts = lifeContexts;
+    }
+
+    public String getProfessionalAreas() {
+        return professionalAreas;
+    }
+
+    public void setProfessionalAreas(String professionalAreas) {
+        this.professionalAreas = professionalAreas;
+    }
+
+    public String getOtherProfiles() {
+        return otherProfiles;
+    }
+
+    public void setOtherProfiles(String otherProfiles) {
+        this.otherProfiles = otherProfiles;
+    }
+
+    public String getObservations() {
+        return observations;
+    }
+
+    public void setObservations(String observations) {
+        this.observations = observations;
+    }
+
+    public String getGeneratedContent() {
+        return generatedContent;
+    }
+
+    public void setGeneratedContent(String generatedContent) {
+        this.generatedContent = generatedContent;
+    }
+
+    public LocalDateTime getGenerationTimestamp() {
+        return generationTimestamp;
+    }
+
+    public void setGenerationTimestamp(LocalDateTime generationTimestamp) {
+        this.generationTimestamp = generationTimestamp;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Integer getRating() {
+        return rating;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    public String getFeedbackText() {
+        return feedbackText;
+    }
+
+    public void setFeedbackText(String feedbackText) {
+        this.feedbackText = feedbackText;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

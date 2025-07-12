@@ -1,40 +1,69 @@
 "use client";
 
-import { useState } from 'react';
-import Image from "next/image";
-import PageTitle from "./PageTitle";
-import Navbar from "../layout/Navbar";
-import Button from "./Button";
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import PageTitle from './PageTitle';
+import Navbar from '../layout/Navbar';
+import Button from './Button';
 import { useRouter } from 'next/navigation';
+import { fetchClassProfiles, deleteClassProfile, ClassProfile } from '@/lib/api';
 
 export default function ManageClassProfilesContent() {
-  // Mock data for demonstration
-  const [classProfiles, setClassProfiles] = useState([
-    { id: 1, name: 'Turma A - Fundamental I', description: 'Tamanho: 25, Nível: Alfabetização' },
-    { id: 2, name: 'Turma B - EJA Jovens', description: 'Tamanho: 15, Nível: Reintegração escolar' },
-    { id: 3, name: 'Turma C - EJA Adultos', description: 'Tamanho: 30, Nível: Multissérie' },
-  ]);
-
+  const [classProfiles, setClassProfiles] = useState<ClassProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleEdit = (id: number) => {
-    console.log(`Editar perfil ${id}`);
-    router.push(`/new-class-profile?id=${id}`); // Navigate to new class profile page for editing
+   
+
+  useEffect(() => {
+    const loadClassProfiles = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchClassProfiles();
+        setClassProfiles(data);
+      } catch (err) {
+        setError('Failed to load class profiles.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadClassProfiles();
+  }, []);
+
+  const handleEdit = (id: string) => {
+    router.push(`/new-class-profile?id=${id}`);
   };
 
-  const handleDelete = (id: number) => {
-    setClassProfiles(classProfiles.filter(profile => profile.id !== id));
-    console.log(`Deletar perfil ${id}`);
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this profile?')) {
+      try {
+        await deleteClassProfile(id);
+        setClassProfiles(classProfiles.filter(profile => profile.id !== id));
+      } catch (err) {
+        alert('Failed to delete class profile.');
+        console.error(err);
+      }
+    }
   };
 
   const handleClear = () => {
-    // Implement clear logic if needed
+    // Implement clear logic if needed (e.g., clear filters)
     console.log("Limpar filtros/seleções");
   };
 
   const handleAddNewProfile = () => {
     router.push('/new-class-profile');
   };
+
+  if (loading) {
+    return <p className="text-center text-gray-500 w-full">Loading profiles...</p>;
+  }
+
+  if (error) {
+    return <p className="text-center text-red-500 w-full">Error: {error}</p>;
+  }
 
   return (
     <>
@@ -50,8 +79,9 @@ export default function ManageClassProfilesContent() {
             {classProfiles.map((profile) => (
               <li key={profile.id} className="flex justify-between items-center p-4 border border-gray-300 rounded-lg shadow-sm">
                 <div>
-                  <h3 className="text-blue-700 text-lg font-semibold">{profile.name}</h3>
-                  <p className="text-gray-600 text-sm">{profile.description}</p>
+                  <h3 className="text-blue-700 text-lg font-semibold">{profile.profileName}</h3>
+                  <p className="text-gray-600 text-sm">Tamanho: {profile.size || 'N/A'}</p>
+                  {/* You might want to display more details here based on your needs */}
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => handleEdit(profile.id)} className="p-2 rounded-full bg-sky-100 hover:bg-sky-200 cursor-pointer">

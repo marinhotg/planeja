@@ -1,6 +1,7 @@
 package com.planeja.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.planeja.dto.GeminiLessonPlanResponse;
 import com.planeja.model.LessonPlan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,7 @@ public class GeminiService {
     }
 
     public LessonPlan generatePlan(String prompt) {
+        logger.info("Generating plan with prompt: {}", prompt);
         String url = String.format("%s/models/%s:generateContent?key=%s", baseUrl, model, apiKey);
 
         HttpHeaders headers = new HttpHeaders();
@@ -61,8 +63,18 @@ public class GeminiService {
                     .path("text").asText();
 
             String cleanJson = extractJsonFromMarkdown(textResponse);
+            logger.info("Clean JSON response from Gemini: {}", cleanJson);
 
-            return objectMapper.readValue(cleanJson, LessonPlan.class);
+            // Deserialize to GeminiLessonPlanResponse DTO
+            GeminiLessonPlanResponse geminiResponse = objectMapper.readValue(cleanJson, GeminiLessonPlanResponse.class);
+            logger.info("Deserialized Gemini response: {}", geminiResponse);
+
+            // Map to LessonPlan entity
+            LessonPlan lessonPlan = new LessonPlan();
+            lessonPlan.setGeneratedContent(cleanJson); // Store the full JSON response
+            lessonPlan.setTheme(geminiResponse.getTitulo()); // Use titulo as theme for now
+
+            return lessonPlan;
         } catch (Exception e) {
             logger.error("Error calling Gemini API or parsing response", e);
             throw new RuntimeException("Failed to generate or parse lesson plan from Gemini", e);
