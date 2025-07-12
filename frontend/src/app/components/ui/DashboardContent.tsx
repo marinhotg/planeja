@@ -45,7 +45,7 @@ export default function DashboardContent() {
 
           return {
             id: plan.id,
-            title: parsedContent?.title || plan.theme, // Use parsed title or theme as fallback
+            title: parsedContent?.titulo || plan.theme, // Use parsed titulo or theme as fallback
             subtitle: plan.level, // Using level as subtitle for now
             discipline: plan.discipline,
             date: new Date(plan.generationTimestamp).toLocaleDateString(),

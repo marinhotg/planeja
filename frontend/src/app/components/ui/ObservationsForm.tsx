@@ -32,6 +32,7 @@ export default function ObservationsForm() {
         ...definitionData,
         ...profileData,
         observacoes: observations,
+        userId: session.user.id, // Add userId here
       };
 
       const generatedPlan = await generateLessonPlan(lessonPlanRequest);
@@ -46,7 +47,7 @@ export default function ObservationsForm() {
         lifeContexts: generatedPlan.lifeContexts || [],
         professionalAreas: generatedPlan.professionalAreas || [],
         otherProfiles: generatedPlan.otherProfiles || [],
-        generatedContent: JSON.stringify(generatedPlan),
+        generatedContent: generatedPlan.generatedContent, // Correctly assign the already stringified content
       };
 
       const savedLessonPlan = await saveLessonPlan(lessonPlanToSave);

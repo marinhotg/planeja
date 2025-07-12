@@ -89,7 +89,7 @@ export default function GeneratedPlanContent() {
 
   // Transform backend response to frontend display structure
   const transformedPlan = {
-    title: parsedContent.title,
+    title: parsedContent.titulo,
     sections: [
       { title: "Objetivo Geral", content: parsedContent.objetivoGeral },
       { title: "Habilidades da BNCC", content: parsedContent.habilidadesTrabalhadas?.join('; ') || '' },

@@ -2,6 +2,7 @@ import axios from 'axios';
 import { getSession } from 'next-auth/react';
 
 export interface LessonPlanRequest {
+  userId: string;
   disciplina: string;
   nivel: string;
   tema: string;
@@ -41,7 +42,7 @@ export interface GeneratedLessonPlan {
 }
 
 export interface ParsedGeneratedContent {
-  title: string;
+  titulo: string;
   objetivoGeral: string;
   habilidadesTrabalhadas: string[];
   metodologia: string;

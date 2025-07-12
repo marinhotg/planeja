@@ -95,19 +95,23 @@ const handler = NextAuth({
             token.refreshToken = refreshedTokens.refreshToken;
             console.log("Access token refreshed successfully.");
           } else {
-            console.error("Failed to refresh access token, logging out user.");
-            // Force re-login by not returning a valid token
-            return null;
+            console.error("Failed to refresh access token, invalidating token.");
+            return { ...token, accessToken: undefined, refreshToken: undefined }; // Invalidate tokens
           }
         } else {
-          console.error("No refresh token available, logging out user.");
-          return null;
+          console.error("No refresh token available, invalidating token.");
+          return { ...token, accessToken: undefined, refreshToken: undefined }; // Invalidate tokens
         }
       }
 
       return token;
     },
     async session({ session, token }) {
+      if (!token.accessToken) {
+        // If there's no access token, the session is invalid
+        return Promise.resolve({ ...session, user: undefined, accessToken: undefined, refreshToken: undefined });
+      }
+
       if (session.user) {
         session.user.id = token.id;
         session.user.email = token.email;
