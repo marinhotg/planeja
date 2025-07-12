@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -33,22 +34,15 @@ public class DataLoader implements CommandLineRunner {
     private ObjectMapper objectMapper;
 
     @Override
-    @Transactional // Ensure all operations are part of a single transaction
+    @Transactionalg
     public void run(String... args) throws Exception {
-        // 1. Clean up existing data to avoid conflicts
-        System.out.println("Cleaning up existing data...");
-        lessonPlanRepository.deleteAll();
-        classProfileRepository.deleteAll();
-        userRepository.deleteAll();
-        System.out.println("Data cleanup complete.");
+        clearDatabase();
 
-        // Create a test user
-        User testUser = new User("Test User", "test@example.com", "password123"); // In real app, hash password!
-        testUser.setId(UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")); // Use the same ID as in LessonPlanController
+        User testUser = new User("Test User", "test@example.com", "password123");
+        testUser.setId(UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"));
         userRepository.save(testUser);
         System.out.println("Created test user: " + testUser.getEmail());
 
-        // Create a test ClassProfile
         ClassProfile testClassProfile = new ClassProfile();
         testClassProfile.setUser(testUser);
         testClassProfile.setProfileName("Turma Teste EJA Noturno");
@@ -61,7 +55,6 @@ public class DataLoader implements CommandLineRunner {
         classProfileRepository.save(testClassProfile);
         System.out.println("Created test class profile: " + testClassProfile.getProfileName());
 
-        // Create a test LessonPlan
         LessonPlan testLessonPlan = new LessonPlan();
         testLessonPlan.setUser(testUser);
         testLessonPlan.setDiscipline("Matemática");
@@ -79,11 +72,19 @@ public class DataLoader implements CommandLineRunner {
         testLessonPlan.setOtherProfiles(objectMapper.writeValueAsString(Arrays.asList("Nenhum")));
         testLessonPlan.setObservations("Foco em exemplos práticos do dia a dia.");
         
-        // Dummy generated content (JSON string)
         String generatedContent = "{\"title\":\"Plano de Aula de Matemática - Operações Básicas\",\"objetivoGeral\":\"Capacitar os alunos a realizar as quatro operações básicas.\",\"habilidadesTrabalhadas\":[\"EF01MA01\",\"EF01MA02\"],\"metodologia\":\"Aulas expositivas e exercícios práticos.\",\"atividades\":[{\"titulo\":\"Introdução\",\"duracao\":\"10 min\",\"descricao\":\"Revisão de conceitos.\"},{\"titulo\":\"Exercícios\",\"duracao\":\"30 min\",\"descricao\":\"Resolução de problemas.\"}],\"recursosNecessarios\":[\"Livro didático\",\"Calculadora\"],\"metodosDeAvaliacao\":\"Observação e lista de exercícios.\"}";
         testLessonPlan.setGeneratedContent(generatedContent);
         testLessonPlan.setGenerationTimestamp(LocalDateTime.now());
         lessonPlanRepository.save(testLessonPlan);
         System.out.println("Created test lesson plan: " + testLessonPlan.getTheme());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void clearDatabase() {
+        System.out.println("Cleaning up existing data...");
+        lessonPlanRepository.deleteAllInBatch();
+        classProfileRepository.deleteAllInBatch();
+        userRepository.deleteAllInBatch();
+        System.out.println("Data cleanup complete.");
     }
 }
