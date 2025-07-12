@@ -165,7 +165,7 @@ export default function ClassProfileForm() {
             type="number"
             placeholder="Ex: 20"
             value={classSize === null ? '' : classSize}
-            onChange={(e) => setClassSize(Number(e.target.value))}
+            onChange={(e) => setClassSize(e.target.value === '' ? null : Number(e.target.value))}
             min="1"
           />
         </div>

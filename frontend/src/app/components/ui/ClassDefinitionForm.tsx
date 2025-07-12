@@ -186,7 +186,7 @@ export default function ClassDefinitionForm() {
             type="number"
             placeholder="Ex: 50"
             value={classDuration === null ? '' : classDuration}
-            onChange={(e) => setClassDuration(Number(e.target.value))}
+            onChange={(e) => setClassDuration(e.target.value === '' ? null : Number(e.target.value))}
             min="0"
           />
         </div>
@@ -200,7 +200,7 @@ export default function ClassDefinitionForm() {
             type="number"
             placeholder="Ex:2"
             value={classQuantity === null ? '' : classQuantity}
-            onChange={(e) => setClassQuantity(Number(e.target.value))}
+            onChange={(e) => setClassQuantity(e.target.value === '' ? null : Number(e.target.value))}
             min="1"
           />
         </div>
