@@ -18,7 +18,12 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(unique = true, columnDefinition = "TEXT")
+    private String googleId;
+
+    @Column(columnDefinition = "TEXT")
+    private String imageUrl;
+
     private String passwordHash;
 
     @Column(nullable = false)
@@ -27,21 +32,21 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    // Constructors
     public User() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
-    public User(String name, String email, String passwordHash) {
+    public User(String name, String email, String googleId, String imageUrl, String passwordHash) {
         this.name = name;
         this.email = email;
+        this.googleId = googleId;
+        this.imageUrl = imageUrl;
         this.passwordHash = passwordHash;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
     public UUID getId() {
         return id;
     }
@@ -64,6 +69,22 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getPasswordHash() {

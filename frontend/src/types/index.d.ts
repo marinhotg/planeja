@@ -40,3 +40,9 @@ interface ClassProfile {
   professional: string[];
   other: string[];
 }
+
+interface User {
+  id: string;
+  email: string;
+  // Add other user properties as needed
+}

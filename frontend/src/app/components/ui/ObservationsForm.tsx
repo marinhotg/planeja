@@ -6,11 +6,13 @@ import PageTitle from "./PageTitle";
 import Button from "./Button";
 import { useRouter } from 'next/navigation';
 import { generateLessonPlan, saveLessonPlan, LessonPlanRequest, GeneratedLessonPlan } from '@/lib/api';
+import { useSession } from 'next-auth/react';
 
 export default function ObservationsForm() {
   const [observations, setObservations] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { data: session } = useSession();
 
   const handleClear = () => {
     setObservations('');
@@ -19,6 +21,10 @@ export default function ObservationsForm() {
   const handleAdvance = async () => {
     setLoading(true);
     try {
+      if (!session || !session.user || !session.user.id) {
+        throw new Error("User not authenticated.");
+      }
+
       const definitionData = JSON.parse(sessionStorage.getItem('lessonPlanDefinition') || '{}');
       const profileData = JSON.parse(sessionStorage.getItem('lessonPlanProfile') || '{}');
 
@@ -28,15 +34,11 @@ export default function ObservationsForm() {
         observacoes: observations,
       };
 
-      // Generate the lesson plan
       const generatedPlan = await generateLessonPlan(lessonPlanRequest);
       
-      // Prepare data for saving to the database
       const lessonPlanToSave: GeneratedLessonPlan = {
         ...generatedPlan,
-        // In a real application, userId should come from an authentication system
-        userId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", // Hardcoded for testing with DataLoader
-        // Ensure all fields expected by the backend are present, even if empty
+        userId: session.user.id, 
         classProfileId: generatedPlan.classProfileId || undefined,
         classSize: generatedPlan.classSize || undefined,
         educationLevels: generatedPlan.educationLevels || [],
@@ -44,13 +46,11 @@ export default function ObservationsForm() {
         lifeContexts: generatedPlan.lifeContexts || [],
         professionalAreas: generatedPlan.professionalAreas || [],
         otherProfiles: generatedPlan.otherProfiles || [],
-        generatedContent: JSON.stringify(generatedPlan), // Store the full generated plan as JSON string
+        generatedContent: JSON.stringify(generatedPlan),
       };
 
-      // Save the generated lesson plan to the database
       const savedLessonPlan = await saveLessonPlan(lessonPlanToSave);
       
-      // Store the saved plan (which now has an ID from the DB) in session storage
       sessionStorage.setItem('generatedLessonPlan', JSON.stringify(savedLessonPlan));
       router.push('/generated-plan');
     } catch (error) {
@@ -68,7 +68,6 @@ export default function ObservationsForm() {
       <Navbar title="Observações" onClear={handleClear} />
 
       <div className="w-full px-4 py-6 flex flex-col justify-start items-start gap-4">
-        {/* Campo de Observações */}
         <div className="self-stretch flex flex-col justify-start items-start gap-2">
           <textarea
             id="observations"

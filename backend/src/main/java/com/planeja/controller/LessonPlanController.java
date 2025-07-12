@@ -44,14 +44,9 @@ public class LessonPlanController {
         String generatedContent = "{\"title\":\"Plano de Aula Gerado\",\"sections\":[{\"title\":\"Objetivo Geral\",\"content\":\"Ensinar sobre o tema: " + request.getTema() + "\"}]}";
 
         LessonPlan lessonPlan = new LessonPlan();
-        // Assuming a default user for now, or retrieve from context/auth
-        // For a real application, you'd get the authenticated user's ID
-        User dummyUser = userService.findById(UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")) // Replace with a valid user ID or create one
-                .orElseGet(() -> {
-                    User newUser = new User("Dummy User", "dummy@example.com", "passwordhash");
-                    return userService.save(newUser);
-                });
-        lessonPlan.setUser(dummyUser);
+        User user = userService.findById(request.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        lessonPlan.setUser(user);
 
         lessonPlan.setDiscipline(request.getDisciplina());
         lessonPlan.setLevel(request.getNivel());

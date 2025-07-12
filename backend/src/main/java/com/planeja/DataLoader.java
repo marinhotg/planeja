@@ -38,7 +38,7 @@ public class DataLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
         clearDatabase();
 
-        User testUser = new User("Test User", "test@example.com", "password123");
+        User testUser = new User("Test User", "test@example.com", "google-id-123", "https://example.com/image.jpg", null);
         testUser.setId(UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"));
         userRepository.save(testUser);
         System.out.println("Created test user: " + testUser.getEmail());

@@ -1,8 +1,10 @@
 package com.planeja.model;
 
 import java.util.List;
+import java.util.UUID;
 
 public class LessonPlanRequest {
+    private UUID userId;
     private String disciplina;
     private String nivel;
     private String tema;
@@ -138,5 +140,13 @@ public class LessonPlanRequest {
 
     public void setNomePerfil(String nomePerfil) {
         this.nomePerfil = nomePerfil;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public void setUserId(UUID userId) {
+        this.userId = userId;
     }
 }

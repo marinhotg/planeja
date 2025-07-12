@@ -1,3 +1,6 @@
+import axios from 'axios';
+import { getSession } from 'next-auth/react';
+
 export interface LessonPlanRequest {
   disciplina: string;
   nivel: string;
@@ -86,184 +89,69 @@ export interface ConfigurationResponse {
   otherProfiles: string[];
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
+});
 
-export async function generateLessonPlan(lessonPlanData: LessonPlanRequest): Promise<GeneratedLessonPlan> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/lesson-plans/generate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(lessonPlanData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to generate lesson plan');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error generating lesson plan:', error);
-    throw error;
+api.interceptors.request.use(async (config) => {
+  const session = await getSession();
+  if (session && session.accessToken) {
+    config.headers.Authorization = `Bearer ${session.accessToken}`;
   }
-}
+  return config;
+});
 
-export async function saveLessonPlan(lessonPlanData: GeneratedLessonPlan): Promise<GeneratedLessonPlan> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/lesson-plans`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(lessonPlanData),
-    });
+export const generateLessonPlan = async (lessonPlanData: LessonPlanRequest): Promise<GeneratedLessonPlan> => {
+  const response = await api.post('/api/lesson-plans/generate', lessonPlanData);
+  return response.data;
+};
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to save lesson plan');
-    }
+export const saveLessonPlan = async (lessonPlanData: GeneratedLessonPlan): Promise<GeneratedLessonPlan> => {
+  const response = await api.post('/api/lesson-plans', lessonPlanData);
+  return response.data;
+};
 
-    return await response.json();
-  } catch (error) {
-    console.error('Error saving lesson plan:', error);
-    throw error;
-  }
-}
+export const fetchLessonPlanById = async (id: string): Promise<GeneratedLessonPlan> => {
+  const response = await api.get(`/api/lesson-plans/${id}`);
+  return response.data;
+};
 
-export async function fetchLessonPlanById(id: string): Promise<GeneratedLessonPlan> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/lesson-plans/${id}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch lesson plan by ID');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching lesson plan by ID:', error);
-    throw error;
-  }
-}
+export const fetchLessonPlans = async (): Promise<GeneratedLessonPlan[]> => {
+  const response = await api.get('/api/lesson-plans');
+  return response.data;
+};
 
-export async function fetchLessonPlans(): Promise<GeneratedLessonPlan[]> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/lesson-plans`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch lesson plans');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching lesson plans:', error);
-    throw error;
-  }
-}
+export const deleteLessonPlan = async (id: string): Promise<void> => {
+  await api.delete(`/api/lesson-plans/${id}`);
+};
 
-export async function deleteLessonPlan(id: string): Promise<void> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/lesson-plans/${id}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to delete lesson plan');
-    }
-  } catch (error) {
-    console.error('Error deleting lesson plan:', error);
-    throw error;
-  }
-}
+export const fetchClassProfiles = async (): Promise<ClassProfile[]> => {
+  const response = await api.get('/api/class-profiles');
+  return response.data;
+};
 
-export async function fetchClassProfiles(): Promise<ClassProfile[]> {
-  try {
-    // In a real app, you'd filter by userId on the backend
-    const response = await fetch(`${API_BASE_URL}/api/class-profiles`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch class profiles');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching class profiles:', error);
-    throw error;
-  }
-}
+export const createClassProfile = async (profileData: ClassProfileRequest): Promise<ClassProfile> => {
+  const response = await api.post('/api/class-profiles', profileData);
+  return response.data;
+};
 
-export async function createClassProfile(profileData: ClassProfileRequest): Promise<ClassProfile> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/class-profiles`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(profileData),
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to create class profile');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error creating class profile:', error);
-    throw error;
-  }
-}
+export const updateClassProfile = async (id: string, profileData: ClassProfileRequest): Promise<ClassProfile> => {
+  const response = await api.put(`/api/class-profiles/${id}`, profileData);
+  return response.data;
+};
 
-export async function updateClassProfile(id: string, profileData: ClassProfileRequest): Promise<ClassProfile> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/class-profiles/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(profileData),
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to update class profile');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error updating class profile:', error);
-    throw error;
-  }
-}
+export const deleteClassProfile = async (id: string): Promise<void> => {
+  await api.delete(`/api/class-profiles/${id}`);
+};
 
-export async function deleteClassProfile(id: string): Promise<void> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/class-profiles/${id}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to delete class profile');
-    }
-  } catch (error) {
-    console.error('Error deleting class profile:', error);
-    throw error;
-  }
-}
+export const fetchClassProfileById = async (id: string): Promise<ClassProfile> => {
+  const response = await api.get(`/api/class-profiles/${id}`);
+  return response.data;
+};
 
-export async function fetchClassProfileById(id: string): Promise<ClassProfile> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/class-profiles/${id}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch class profile by ID');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching class profile by ID:', error);
-    throw error;
-  }
-}
+export const fetchConfigurations = async (): Promise<ConfigurationResponse> => {
+  const response = await api.get('/api/configurations');
+  return response.data;
+};
 
-export async function fetchConfigurations(): Promise<ConfigurationResponse> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/configurations`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch configurations');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching configurations:', error);
-    throw error;
-  }
-}
+export default api;

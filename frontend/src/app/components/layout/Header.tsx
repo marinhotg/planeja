@@ -3,19 +3,20 @@
 import Image from "next/image";
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
+import { signOut, useSession } from 'next-auth/react';
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [showLogoutButton, setShowLogoutButton] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const { data: session } = useSession();
 
   const menuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const isAuthPage = pathname === '/login' || pathname === '/register';
 
-  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -33,8 +34,7 @@ export default function Header() {
   }, []);
 
   const handleLogout = () => {
-    // Implementar lógica de logout (limpar tokens, etc.)
-    router.push('/login');
+    signOut();
     setShowLogoutButton(false);
   };
 
@@ -92,7 +92,7 @@ export default function Header() {
             PlanEJA
           </div>
 
-          {!isAuthPage && (
+          {!isAuthPage && session && (
             <div className="relative" ref={userMenuRef}>
               <button onClick={() => setShowLogoutButton(!showLogoutButton)} className="cursor-pointer">
                 <Image src="/user-icon.svg" alt="Usuário" width={28} height={28} />
