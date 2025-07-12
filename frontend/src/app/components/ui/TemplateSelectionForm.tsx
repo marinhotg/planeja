@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 
 export default function TemplateSelectionForm() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleTemplateClick = (template: string) => {
@@ -16,6 +17,10 @@ export default function TemplateSelectionForm() {
   };
 
   const handleAdvance = () => {
+    if (!selectedTemplate) {
+      setError("Por favor, selecione um template para avançar.");
+      return;
+    }
     // Logic to save selected template if needed
     router.push('/class-definition');
   };
@@ -87,7 +92,10 @@ export default function TemplateSelectionForm() {
           </ul>
         </div>
       </div>
-      <Button className="w-full mt-8" onClick={handleAdvance}>Avançar</Button>
+      <div className="w-full">
+        {error && <p className="text-red-500 text-sm mb-8 text-center">{error}</p>}
+        <Button className="w-full" onClick={handleAdvance}>Avançar</Button>
+      </div>
     </>
   );
 }

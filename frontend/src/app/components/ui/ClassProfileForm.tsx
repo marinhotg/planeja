@@ -25,6 +25,7 @@ export default function ClassProfileForm() {
   const [configurations, setConfigurations] = useState<ConfigurationResponse | null>(null);
   const [loadingConfigs, setLoadingConfigs] = useState(true);
   const [errorConfigs, setErrorConfigs] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -110,10 +111,17 @@ export default function ClassProfileForm() {
   };
 
   const handleAdvance = () => {
-    if (saveProfile && profileNameInput.trim() === '') {
-      alert("Por favor, insira um nome para o perfil.");
+    if (!classSize || classSize <= 0) {
+      setFormError("Por favor, preencha o tamanho da turma.");
       return;
     }
+
+    if (saveProfile && profileNameInput.trim() === '') {
+      setFormError("Por favor, insira um nome para o perfil.");
+      return;
+    }
+
+    setFormError(null);
 
     const classProfileData = {
       tamanho: classSize,
@@ -232,7 +240,10 @@ export default function ClassProfileForm() {
           </div>
         )}
 
-        <Button className="w-full mt-8" onClick={handleAdvance}>Avançar</Button>
+        <div className="w-full">
+          {formError && <p className="text-red-500 text-sm mb-8 text-center">{formError}</p>}
+          <Button className="w-full" onClick={handleAdvance}>Avançar</Button>
+        </div>
       </div>
 
       <ProfileSelectionModal
