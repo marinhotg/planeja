@@ -43,3 +43,4 @@ jwt:
   secret: PNcd1MKSv9nv/rNUC4HcMtvx6mGqHYEbQePtIXnYnzw=
 
   expiration: 3600000
+  refresh-token.expiration: 604800000 # 7 days

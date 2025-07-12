@@ -26,6 +26,8 @@ public class User {
 
     private String passwordHash;
 
+    private String refreshToken;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
@@ -93,6 +95,14 @@ public class User {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     public LocalDateTime getCreatedAt() {

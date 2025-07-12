@@ -12,9 +12,11 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
 
     public List<User> findAll() {
@@ -41,12 +43,23 @@ public class UserService {
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
             user = new User(name, email, googleId, imageUrl, null);
+            String refreshToken = jwtService.generateRefreshToken(email);
+            user.setRefreshToken(refreshToken);
             userRepository.save(user);
         } else if (user.getGoogleId() == null) {
             user.setGoogleId(googleId);
             user.setImageUrl(imageUrl);
+            String refreshToken = jwtService.generateRefreshToken(email);
+            user.setRefreshToken(refreshToken);
             userRepository.save(user);
         }
         return user;
+    }
+
+    public User updateRefreshToken(String email, String newRefreshToken) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setRefreshToken(newRefreshToken);
+        return userRepository.save(user);
     }
 }

@@ -2,6 +2,7 @@ package com.planeja.controller;
 
 import com.planeja.dto.AuthResponse;
 import com.planeja.dto.GoogleLoginRequest;
+import com.planeja.dto.RefreshTokenRequest;
 import com.planeja.model.User;
 import com.planeja.service.JwtService;
 import com.planeja.service.UserService;
@@ -26,7 +27,24 @@ public class UserController {
     @PostMapping("/google-login")
     public ResponseEntity<AuthResponse> googleLogin(@RequestBody GoogleLoginRequest request) {
         User user = userService.findOrCreateGoogleUser(request.getEmail(), request.getName(), request.getGoogleId(), request.getImageUrl());
-        String jwt = jwtService.generateToken(user.getEmail());
-        return ResponseEntity.ok(new AuthResponse(user, jwt));
+        String accessToken = jwtService.generateToken(user.getEmail());
+        String refreshToken = user.getRefreshToken(); // Get the refresh token from the user object
+        return ResponseEntity.ok(new AuthResponse(user, accessToken, refreshToken));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+        String userEmail = jwtService.extractUsername(request.getRefreshToken());
+        User user = userService.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (jwtService.isTokenValid(request.getRefreshToken(), user.getEmail()) && user.getRefreshToken().equals(request.getRefreshToken())) {
+            String newAccessToken = jwtService.generateToken(user.getEmail());
+            String newRefreshToken = jwtService.generateRefreshToken(user.getEmail());
+            userService.updateRefreshToken(user.getEmail(), newRefreshToken);
+            return ResponseEntity.ok(new AuthResponse(user, newAccessToken, newRefreshToken));
+        } else {
+            return ResponseEntity.status(401).build(); // Unauthorized
+        }
     }
 }
