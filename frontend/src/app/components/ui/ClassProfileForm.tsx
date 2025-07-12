@@ -9,6 +9,7 @@ import TextInput from "./TextInput";
 import ProfileSelectionModal from './ProfileSelectionModal';
 import { useRouter } from 'next/navigation';
 import { fetchConfigurations, ConfigurationResponse } from '@/lib/api';
+import MultiSelectButtons from "./MultiSelectButtons";
 import { UIClassProfile, isCompleteProfile } from '@/types/profile';
 
 export default function ClassProfileForm() {
@@ -53,6 +54,31 @@ export default function ClassProfileForm() {
     setter((prev) =>
       prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
     );
+  };
+
+  const handleAddNewOption = (field: keyof ConfigurationResponse, value: string) => {
+    if (configurations) {
+      const newOptions = [...(configurations[field] as string[]), value];
+      setConfigurations({ ...configurations, [field]: newOptions });
+
+      switch (field) {
+        case 'educationLevels':
+          setSelectedEducationLevels([...selectedEducationLevels, value]);
+          break;
+        case 'ageRanges':
+          setSelectedAgeRanges([...selectedAgeRanges, value]);
+          break;
+        case 'lifeContexts':
+          setSelectedLifeContexts([...selectedLifeContexts, value]);
+          break;
+        case 'professionalAreas':
+          setSelectedProfessionalAreas([...selectedProfessionalAreas, value]);
+          break;
+        case 'otherProfiles':
+          setSelectedOtherProfiles([...selectedOtherProfiles, value]);
+          break;
+      }
+    }
   };
 
   const handleClear = () => {
@@ -137,89 +163,49 @@ export default function ClassProfileForm() {
         </div>
         <div className="self-stretch border-b border-gray-200 my-2"></div>
 
-        {/* Nível de escolarização */}
-        <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel>Nível de escolarização</InputLabel>
-          <div className="flex flex-wrap gap-2">
-            {educationLevels.map((level) => (
-              <button
-                key={level}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedEducationLevels.includes(level) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
-                onClick={() => handleMultiSelectChange(setSelectedEducationLevels, level)}
-              >
-                {level}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelectButtons
+          label="Nível de escolarização"
+          options={educationLevels}
+          selectedOptions={selectedEducationLevels}
+          onChange={(value) => handleMultiSelectChange(setSelectedEducationLevels, value)}
+          onAddNewOption={(value) => handleAddNewOption('educationLevels', value)}
+        />
         <div className="self-stretch border-b border-gray-200 my-2"></div>
 
-        {/* Faixa etária */}
-        <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel>Faixa etária</InputLabel>
-          <div className="flex flex-wrap gap-2">
-            {ageRanges.map((range) => (
-              <button
-                key={range}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedAgeRanges.includes(range) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
-                onClick={() => handleMultiSelectChange(setSelectedAgeRanges, range)}
-              >
-                {range}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelectButtons
+          label="Faixa etária"
+          options={ageRanges}
+          selectedOptions={selectedAgeRanges}
+          onChange={(value) => handleMultiSelectChange(setSelectedAgeRanges, value)}
+          onAddNewOption={(value) => handleAddNewOption('ageRanges', value)}
+        />
         <div className="self-stretch border-b border-gray-200 my-2"></div>
 
-        {/* Contexto de vida */}
-        <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel>Contexto de vida</InputLabel>
-          <div className="flex flex-wrap gap-2">
-            {lifeContexts.map((context) => (
-              <button
-                key={context}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedLifeContexts.includes(context) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
-                onClick={() => handleMultiSelectChange(setSelectedLifeContexts, context)}
-              >
-                {context}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelectButtons
+          label="Contexto de vida"
+          options={lifeContexts}
+          selectedOptions={selectedLifeContexts}
+          onChange={(value) => handleMultiSelectChange(setSelectedLifeContexts, value)}
+          onAddNewOption={(value) => handleAddNewOption('lifeContexts', value)}
+        />
         <div className="self-stretch border-b border-gray-200 my-2"></div>
 
-        {/* Área profissional */}
-        <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel>Área profissional</InputLabel>
-          <div className="flex flex-wrap gap-2">
-            {professionalAreas.map((area) => (
-              <button
-                key={area}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedProfessionalAreas.includes(area) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
-                onClick={() => handleMultiSelectChange(setSelectedProfessionalAreas, area)}
-              >
-                {area}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelectButtons
+          label="Área profissional"
+          options={professionalAreas}
+          selectedOptions={selectedProfessionalAreas}
+          onChange={(value) => handleMultiSelectChange(setSelectedProfessionalAreas, value)}
+          onAddNewOption={(value) => handleAddNewOption('professionalAreas', value)}
+        />
         <div className="self-stretch border-b border-gray-200 my-2"></div>
 
-        {/* Outros perfis relevantes */}
-        <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel>Outros perfis relevantes</InputLabel>
-          <div className="flex flex-wrap gap-2">
-            {otherProfiles.map((profile) => (
-              <button
-                key={profile}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedOtherProfiles.includes(profile) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
-                onClick={() => handleMultiSelectChange(setSelectedOtherProfiles, profile)}
-              >
-                {profile}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelectButtons
+          label="Outros perfis relevantes"
+          options={otherProfiles}
+          selectedOptions={selectedOtherProfiles}
+          onChange={(value) => handleMultiSelectChange(setSelectedOtherProfiles, value)}
+          onAddNewOption={(value) => handleAddNewOption('otherProfiles', value)}
+        />
 
         {/* Salvar perfil */}
         <div className="self-stretch py-4 inline-flex justify-start items-center gap-3">

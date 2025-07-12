@@ -8,6 +8,7 @@ import InputLabel from "./InputLabel";
 import TextInput from "./TextInput";
 import { useRouter } from 'next/navigation';
 import { fetchConfigurations, ConfigurationResponse } from '@/lib/api';
+import MultiSelectButtons from "./MultiSelectButtons";
 
 export default function ClassDefinitionForm() {
   const [selectedDiscipline, setSelectedDiscipline] = useState<string | null>(null);
@@ -47,6 +48,14 @@ export default function ClassDefinitionForm() {
     setSelectedResources((prev) =>
       prev.includes(resource) ? prev.filter((r) => r !== resource) : [...prev, resource]
     );
+  };
+
+  const handleAddNewResource = (resource: string) => {
+    if (configurations) {
+      const newResources = [...configurations.resources, resource];
+      setConfigurations({ ...configurations, resources: newResources });
+      setSelectedResources([...selectedResources, resource]);
+    }
   };
 
   const handleClear = () => {
@@ -181,21 +190,13 @@ export default function ClassDefinitionForm() {
         </div>
         <div className="self-stretch border-b border-gray-200 my-2"></div>
 
-        {/* Recursos disponíveis */}
-        <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel>Recursos disponíveis</InputLabel>
-          <div className="flex flex-wrap gap-2">
-            {resources.map((resource) => (
-              <button
-                key={resource}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedResources.includes(resource) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
-                onClick={() => handleResourceChange(resource)}
-              >
-                {resource}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelectButtons
+          label="Recursos disponíveis"
+          options={resources}
+          selectedOptions={selectedResources}
+          onChange={handleResourceChange}
+          onAddNewOption={handleAddNewResource}
+        />
 
       <Button className="w-full mt-8" onClick={handleAdvance}>Avançar</Button>
       </div>

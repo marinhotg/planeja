@@ -34,7 +34,7 @@ public class DataLoader implements CommandLineRunner {
     private ObjectMapper objectMapper;
 
     @Override
-    @Transactionalg
+    @Transactional
     public void run(String... args) throws Exception {
         clearDatabase();
 
