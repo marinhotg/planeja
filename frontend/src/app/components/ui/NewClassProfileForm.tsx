@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Navbar from "../layout/Navbar";
-import PageTitle from "./PageTitle";
-import Button from "./Button";
-import InputLabel from "./InputLabel";
-import TextInput from "./TextInput";
+import Navbar from '../layout/Navbar';
+import PageTitle from './PageTitle';
+import Button from './Button';
+import InputLabel from './InputLabel';
+import TextInput from './TextInput';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { createClassProfile, updateClassProfile, fetchClassProfileById, ClassProfileRequest, fetchConfigurations, ConfigurationResponse } from '@/lib/api';
 
 export default function NewClassProfileForm() {
   const router = useRouter();
@@ -20,71 +21,60 @@ export default function NewClassProfileForm() {
   const [selectedLifeContexts, setSelectedLifeContexts] = useState<string[]>([]);
   const [selectedProfessionalAreas, setSelectedProfessionalAreas] = useState<string[]>([]);
   const [selectedOtherProfiles, setSelectedOtherProfiles] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [configurations, setConfigurations] = useState<ConfigurationResponse | null>(null); // Store fetched configurations
+  const [loadingConfigs, setLoadingConfigs] = useState(true);
+  const [errorConfigs, setErrorConfigs] = useState<string | null>(null);
 
-  const educationLevels = [
-    'Reintegração escolar',
-    'Multissérie',
-    'Interesse em temas práticos',
-    'Alfabetização',
-    'Experiência com tecnologia',
-  ];
+  // Mock user ID for now - replace with actual authenticated user ID
+  const MOCK_USER_ID = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"; 
 
-  const ageRanges = [
-    'Jovens (15 a 24 anos)',
-    'Adultos (25 a 59 anos)',
-    'Idosos (60+ anos)',
-  ];
+  useEffect(() => {
+    const loadConfigurations = async () => {
+      try {
+        setLoadingConfigs(true);
+        const configs = await fetchConfigurations();
+        setConfigurations(configs);
+      } catch (err) {
+        setErrorConfigs('Failed to load configurations.');
+        console.error(err);
+      } finally {
+        setLoadingConfigs(false);
+      }
+    };
+    loadConfigurations();
+  }, []);
 
-  const lifeContexts = [
-    'Trabalhadores noturnos',
-    'Desempregados',
-    'Mães',
-    'Pais',
-    'Cuidadores familiares',
-    'Migrantes/recém-chegados',
-  ];
-
-  const professionalAreas = [
-    'Comércio e Vendas',
-    'Construção Civil',
-    'Transporte e Logística',
-    'Serviços Gerais',
-    'Alimentação',
-    'Agricultura',
-    'Cuidado e Saúde',
-    'Administração / Escritório',
-  ];
-
-  const otherProfiles = [
-    'Pessoas com deficiência',
-    'Povos originários',
-    'Pessoas privadas de liberdade',
-    'Refugiados',
-    'Estrangeiros',
-  ];
-
-  // Mock data for editing
   useEffect(() => {
     if (profileId) {
-      // In a real application, you would fetch profile data here
-      const mockProfile = {
-        name: "Turma de Edição",
-        size: 22,
-        education: ['Alfabetização'],
-        age: ['Adultos (25 a 59 anos)'],
-        life: ['Trabalhadores noturnos'],
-        professional: ['Comércio e Vendas'],
-        other: ['Refugiados'],
+      const loadProfile = async () => {
+        try {
+          setLoading(true);
+          const profile = await fetchClassProfileById(profileId);
+          setProfileName(profile.profileName);
+          setClassSize(profile.size || null);
+          setSelectedEducationLevels(profile.educationLevels || []);
+          setSelectedAgeRanges(profile.ageRanges || []);
+          setSelectedLifeContexts(profile.lifeContexts || []);
+          setSelectedProfessionalAreas(profile.professionalAreas || []);
+          setSelectedOtherProfiles(profile.otherProfiles || []);
+        } catch (err) {
+          setError('Failed to load profile for editing.');
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
       };
-      setProfileName(mockProfile.name);
-      setClassSize(mockProfile.size);
-      setSelectedEducationLevels(mockProfile.education);
-      setSelectedAgeRanges(mockProfile.age);
-      setSelectedLifeContexts(mockProfile.life);
-      setSelectedProfessionalAreas(mockProfile.professional);
-      setSelectedOtherProfiles(mockProfile.other);
+      loadProfile();
     }
   }, [profileId]);
+
+  const educationLevels = configurations?.educationLevels || [];
+  const ageRanges = configurations?.ageRanges || [];
+  const lifeContexts = configurations?.lifeContexts || [];
+  const professionalAreas = configurations?.professionalAreas || [];
+  const otherProfiles = configurations?.otherProfiles || [];
 
   const handleMultiSelectChange = (setter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
     setter((prev) =>
@@ -102,22 +92,52 @@ export default function NewClassProfileForm() {
     setSelectedOtherProfiles([]);
   };
 
-  const handleSaveProfile = () => {
-    console.log("Salvar/Atualizar perfil:", {
-      profileId,
+  const handleSaveProfile = async () => {
+    if (!profileName.trim()) {
+      alert("Please enter a profile name.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const profileData: ClassProfileRequest = {
+      userId: MOCK_USER_ID,
       profileName,
-      classSize,
-      selectedEducationLevels,
-      selectedAgeRanges,
-      selectedLifeContexts,
-      selectedProfessionalAreas,
-      selectedOtherProfiles,
-    });
-    // Implement save/update logic
-    router.push('/manage-class-profiles');
+      size: classSize || undefined,
+      educationLevels: selectedEducationLevels.length > 0 ? selectedEducationLevels : undefined,
+      ageRanges: selectedAgeRanges.length > 0 ? selectedAgeRanges : undefined,
+      lifeContexts: selectedLifeContexts.length > 0 ? selectedLifeContexts : undefined,
+      professionalAreas: selectedProfessionalAreas.length > 0 ? selectedProfessionalAreas : undefined,
+      otherProfiles: selectedOtherProfiles.length > 0 ? selectedOtherProfiles : undefined,
+    };
+
+    try {
+      if (profileId) {
+        await updateClassProfile(profileId, profileData);
+        alert("Profile updated successfully!");
+      } else {
+        await createClassProfile(profileData);
+        alert("Profile created successfully!");
+      }
+      router.push('/manage-class-profiles');
+    } catch (err) {
+      setError('Failed to save profile.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const navbarTitle = profileId ? "Editar perfil" : "Novo perfil";
+
+  if (loadingConfigs || (loading && profileId)) {
+    return <p className="text-center text-gray-500 w-full">Loading...</p>;
+  }
+
+  if (errorConfigs || error) {
+    return <p className="text-center text-red-500 w-full">Error: {errorConfigs || error}</p>;
+  }
 
   return (
     <>
@@ -135,6 +155,7 @@ export default function NewClassProfileForm() {
             placeholder="Ex: Turma EJA Noturno"
             value={profileName}
             onChange={(e) => setProfileName(e.target.value)}
+            disabled={loading}
           />
         </div>
         <div className="self-stretch border-b border-gray-200 my-2"></div>
@@ -149,6 +170,7 @@ export default function NewClassProfileForm() {
             value={classSize === null ? '' : classSize}
             onChange={(e) => setClassSize(Number(e.target.value))}
             min="1"
+            disabled={loading}
           />
         </div>
         <div className="self-stretch border-b border-gray-200 my-2"></div>
@@ -162,6 +184,7 @@ export default function NewClassProfileForm() {
                 key={level}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedEducationLevels.includes(level) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
                 onClick={() => handleMultiSelectChange(setSelectedEducationLevels, level)}
+                disabled={loading}
               >
                 {level}
               </button>
@@ -179,6 +202,7 @@ export default function NewClassProfileForm() {
                 key={range}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedAgeRanges.includes(range) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
                 onClick={() => handleMultiSelectChange(setSelectedAgeRanges, range)}
+                disabled={loading}
               >
                 {range}
               </button>
@@ -196,6 +220,7 @@ export default function NewClassProfileForm() {
                 key={context}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedLifeContexts.includes(context) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
                 onClick={() => handleMultiSelectChange(setSelectedLifeContexts, context)}
+                disabled={loading}
               >
                 {context}
               </button>
@@ -213,6 +238,7 @@ export default function NewClassProfileForm() {
                 key={area}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedProfessionalAreas.includes(area) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
                 onClick={() => handleMultiSelectChange(setSelectedProfessionalAreas, area)}
+                disabled={loading}
               >
                 {area}
               </button>
@@ -230,6 +256,7 @@ export default function NewClassProfileForm() {
                 key={profile}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition-colors duration-200 hover:bg-blue-100 cursor-pointer ${selectedOtherProfiles.includes(profile) ? 'bg-blue-700 text-white' : 'bg-indigo-50 text-blue-600'}`}
                 onClick={() => handleMultiSelectChange(setSelectedOtherProfiles, profile)}
+                disabled={loading}
               >
                 {profile}
               </button>
@@ -237,7 +264,9 @@ export default function NewClassProfileForm() {
           </div>
         </div>
 
-        <Button className="w-full mt-8" onClick={handleSaveProfile}>Salvar</Button>
+        <Button className="w-full mt-8" onClick={handleSaveProfile} disabled={loading}>
+          {loading ? (profileId ? 'Updating...' : 'Creating...') : 'Salvar'}
+        </Button>
       </div>
     </>
   );
