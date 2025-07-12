@@ -60,10 +60,10 @@ public class BNCCSearchService {
 
             Map<String, Object> filter = new java.util.HashMap<>();
             if (area != null) {
-                filter.put("area", area);
+                filter.put("area", mapAreaToPineconeFormat(area));
             }
             if (etapa != null) {
-                filter.put("etapa", etapa);
+                filter.put("etapa", mapEtapaToPineconeFormat(etapa));
             }
             if (anos != null && !anos.isEmpty()) {
                 filter.put("ano", Map.of("$in", anos));
@@ -74,7 +74,9 @@ public class BNCCSearchService {
 
             HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
 
+            logger.info("Sending Pinecone query to {}: {}", pineconeUrl, requestBody);
             String jsonResponse = restTemplate.exchange(pineconeUrl, HttpMethod.POST, requestEntity, String.class).getBody();
+            logger.info("Received Pinecone response: {}", jsonResponse);
             JsonNode rootNode = objectMapper.readTree(jsonResponse);
             JsonNode matchesNode = rootNode.path("matches");
 
@@ -120,5 +122,77 @@ public class BNCCSearchService {
         }
 
         return bnccContent;
+    }
+
+    private String removeAccentsAndFormat(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        String normalizedText = java.text.Normalizer.normalize(text, java.text.Normalizer.Form.NFD);
+        String asciiText = normalizedText.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        String formattedText = asciiText.toLowerCase().replaceAll("\\s+", "_").replaceAll("[^a-z0-9_]", "");
+        return formattedText.replaceAll("__+", "_").replaceAll("^_|_$", "");
+    }
+
+    private String mapEtapaToPineconeFormat(String etapa) {
+        if (etapa == null || etapa.isEmpty()) {
+            return etapa;
+        }
+        if (etapa.toLowerCase().contains("fundamental")) {
+            return "ensino_fundamental";
+        } else if (etapa.toLowerCase().contains("médio") || etapa.toLowerCase().contains("medio")) {
+            return "ensino_medio";
+        } else if (etapa.toLowerCase().contains("eja")) {
+            return "todas"; // EJA specific chunks have 'todas' as etapa
+        }
+        return etapa.toLowerCase().replaceAll("\\s+", "_"); // Default fallback
+    }
+
+    private String mapAreaToPineconeFormat(String area) {
+        if (area == null || area.isEmpty()) {
+            return area;
+        }
+        switch (area.toLowerCase()) {
+            case "linguagens":
+                // This is ambiguous, could be Lingua Portuguesa (EF) or Linguagens e suas Tecnologias (EM)
+                // For now, let's assume Lingua Portuguesa for EF context based on common queries.
+                // A more robust solution might involve passing the education level from frontend.
+                return "lingua_portuguesa"; 
+            case "matemática":
+            case "matematica":
+                return "matematica";
+            case "ciências":
+            case "ciencias":
+                return "ciencias";
+            case "história":
+            case "historia":
+                return "historia";
+            case "geografia":
+                return "geografia";
+            case "arte":
+                return "arte";
+            case "educação física":
+            case "educacao fisica":
+                return "educacao_fisica";
+            case "ensino religioso":
+                return "ensino_religioso";
+            case "língua inglesa":
+            case "lingua inglesa":
+                return "lingua_inglesa";
+            // Add mappings for Ensino Médio areas if needed, e.g.:
+            case "linguagens e suas tecnologias":
+                return "linguagens_e_suas_tecnologias";
+            case "matemática e suas tecnologias":
+            case "matematica e suas tecnologias":
+                return "matematica_e_suas_tecnologias";
+            case "ciências da natureza e suas tecnologias":
+            case "ciencias da natureza e suas tecnologias":
+                return "ciencias_da_natureza_e_suas_tecnologias";
+            case "ciências humanas e sociais aplicadas":
+            case "ciencias humanas e sociais aplicadas":
+                return "ciencias_humanas_e_sociais_aplicadas";
+            default:
+                return removeAccentsAndFormat(area); // Fallback to generic formatting
+        }
     }
 }
