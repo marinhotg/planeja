@@ -5,18 +5,38 @@ import Navbar from "../layout/Navbar";
 import PageTitle from "./PageTitle";
 import Button from "./Button";
 import { useRouter } from 'next/navigation';
+import { generateLessonPlan } from '@/lib/api';
 
 export default function ObservationsForm() {
   const [observations, setObservations] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleClear = () => {
     setObservations('');
   };
 
-  const handleAdvance = () => {
-    // Logic to save observations data if needed
-    router.push('/generated-plan');
+  const handleAdvance = async () => {
+    setLoading(true);
+    try {
+      const definitionData = JSON.parse(sessionStorage.getItem('lessonPlanDefinition') || '{}');
+      const profileData = JSON.parse(sessionStorage.getItem('lessonPlanProfile') || '{}');
+
+      const lessonPlanRequest = {
+        ...definitionData,
+        ...profileData,
+        observacoes: observations,
+      };
+
+      const generatedPlan = await generateLessonPlan(lessonPlanRequest);
+      sessionStorage.setItem('generatedLessonPlan', JSON.stringify(generatedPlan));
+      router.push('/generated-plan');
+    } catch (error) {
+      alert('Erro ao gerar plano de aula. Por favor, tente novamente.');
+      console.error('Failed to generate lesson plan:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,10 +54,13 @@ export default function ObservationsForm() {
             placeholder="Inserção livre de informações que o professor considera importantes (ex: necessidades específicas de alunos, limitações do espaço físico, sugestões pessoais)"
             value={observations}
             onChange={(e) => setObservations(e.target.value)}
+            disabled={loading}
           ></textarea>
         </div>
 
-        <Button className="w-full mt-8" onClick={handleAdvance}>Avançar</Button>
+        <Button className="w-full mt-8" onClick={handleAdvance} disabled={loading}>
+          {loading ? 'Gerando plano...' : 'Avançar'}
+        </Button>
       </div>
     </>
   );

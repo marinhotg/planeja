@@ -6,7 +6,7 @@ import Button from './Button';
 interface ProfileSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectProfile: (profile: any) => void; // Replace 'any' with a proper type for your profile
+  onSelectProfile: (profile: ClassProfile) => void; // Replace 'any' with a proper type for your profile
 }
 
 export default function ProfileSelectionModal({ isOpen, onClose, onSelectProfile }: ProfileSelectionModalProps) {

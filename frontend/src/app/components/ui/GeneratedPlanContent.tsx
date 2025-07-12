@@ -2,35 +2,38 @@
 
 import PageTitle from "./PageTitle";
 import Image from "next/image";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function GeneratedPlanContent() {
-  const [generatedPlan, setGeneratedPlan] = useState({
-    type: "resumido",
-    title: "Plano de Aula: Introdução à Álgebra",
-    sections: [
-      {
-        title: "Turma",
-        content: "Nível II",
-      },
-      {
-        title: "Objetivo",
-        content: "Introduzir os conceitos fundamentais de álgebra, incluindo variáveis, expressões e equações simples.",
-      },
-      {
-        title: "Habilidades da BNCC",
-        content: "Matemática - Álgebra: (EF07MA01) Compreender o conceito de variável e a representação de expressões algébricas.",
-      },
-      {
-        title: "Conteúdo resumido",
-        content: "Variáveis e constantes; Expressões algébricas; Equações do 1º grau (introdução).",
-      },
-      {
-        title: "Duração e Recursos Necessários",
-        content: "Duração: 50 minutos. Recursos: Quadro e giz/lousa, Livros didáticos, Cadernos e canetas.",
-      },
-    ],
-  });
+  const [generatedPlan, setGeneratedPlan] = useState<{
+    title: string;
+    sections: { title: string; content: string }[];
+  } | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const storedPlan = sessionStorage.getItem('generatedLessonPlan');
+    if (storedPlan) {
+      const parsedPlan = JSON.parse(storedPlan);
+      // Transform backend response to frontend display structure
+      const transformedPlan = {
+        title: parsedPlan.titulo,
+        sections: [
+          { title: "Objetivo Geral", content: parsedPlan.objetivoGeral },
+          { title: "Habilidades da BNCC", content: parsedPlan.habilidadesTrabalhadas.join('; ') },
+          { title: "Metodologia", content: parsedPlan.metodologia },
+          { title: "Atividades", content: parsedPlan.atividades.map((activity: { titulo: string; duracao: string; descricao: string }) => `${activity.titulo} (${activity.duracao}): ${activity.descricao}`).join('\n') },
+          { title: "Recursos Necessários", content: parsedPlan.recursosNecessarios.join(', ') },
+          { title: "Métodos de Avaliação", content: parsedPlan.metodosDeAvaliacao },
+        ],
+      };
+      setGeneratedPlan(transformedPlan);
+    } else {
+      // If no plan is found, redirect back or show a message
+      router.push('/observations'); // Redirect to the previous step
+    }
+  }, [router]);
 
   const handleDownload = () => {
     console.log("Baixar plano");
@@ -46,6 +49,10 @@ export default function GeneratedPlanContent() {
     console.log("Favoritar plano");
     // Implement favorite logic
   };
+
+  if (!generatedPlan) {
+    return null; // Or a loading spinner
+  }
 
   return (
     <>
@@ -69,10 +76,10 @@ export default function GeneratedPlanContent() {
 
       <div className="w-full p-6 bg-gray-50 min-h-[300px] overflow-y-auto">
         <h2 className="text-blue-700 text-xl font-bold mb-4">{generatedPlan.title}</h2>
-        {generatedPlan.sections.map((section, index) => (
+        {generatedPlan.sections.map((section: { title: string; content: string }, index: number) => (
           <div key={index} className="mb-4 last:mb-0">
             <h3 className="text-blue-700 text-lg font-semibold mb-1">{section.title}:</h3>
-            <p className="text-black text-base leading-relaxed">{section.content}</p>
+            <p className="text-black text-base leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>{section.content}</p>
           </div>
         ))}
       </div>

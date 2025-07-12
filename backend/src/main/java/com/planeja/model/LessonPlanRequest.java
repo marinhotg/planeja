@@ -6,15 +6,18 @@ public class LessonPlanRequest {
     private String disciplina;
     private String nivel;
     private String tema;
-    private String duracao;
-    private String quantidade;
+    private Integer duracao;
+    private Integer quantidade;
     private List<String> recursos;
-    private String tamanho;
+    private Integer tamanho;
     private List<String> escolarizacao;
     private List<String> faixas;
     private List<String> contextos;
     private List<String> profissoes;
+    private List<String> outrosPerfis;
     private String observacoes;
+    private Boolean salvarPerfil;
+    private String nomePerfil;
 
     public String getDisciplina() {
         return disciplina;
@@ -40,19 +43,19 @@ public class LessonPlanRequest {
         this.tema = tema;
     }
 
-    public String getDuracao() {
+    public Integer getDuracao() {
         return duracao;
     }
 
-    public void setDuracao(String duracao) {
+    public void setDuracao(Integer duracao) {
         this.duracao = duracao;
     }
 
-    public String getQuantidade() {
+    public Integer getQuantidade() {
         return quantidade;
     }
 
-    public void setQuantidade(String quantidade) {
+    public void setQuantidade(Integer quantidade) {
         this.quantidade = quantidade;
     }
 
@@ -64,11 +67,11 @@ public class LessonPlanRequest {
         this.recursos = recursos;
     }
 
-    public String getTamanho() {
+    public Integer getTamanho() {
         return tamanho;
     }
 
-    public void setTamanho(String tamanho) {
+    public void setTamanho(Integer tamanho) {
         this.tamanho = tamanho;
     }
 
@@ -104,11 +107,35 @@ public class LessonPlanRequest {
         this.profissoes = profissoes;
     }
 
+    public List<String> getOutrosPerfis() {
+        return outrosPerfis;
+    }
+
+    public void setOutrosPerfis(List<String> outrosPerfis) {
+        this.outrosPerfis = outrosPerfis;
+    }
+
     public String getObservacoes() {
         return observacoes;
     }
 
     public void setObservacoes(String observacoes) {
         this.observacoes = observacoes;
+    }
+
+    public Boolean getSalvarPerfil() {
+        return salvarPerfil;
+    }
+
+    public void setSalvarPerfil(Boolean salvarPerfil) {
+        this.salvarPerfil = salvarPerfil;
+    }
+
+    public String getNomePerfil() {
+        return nomePerfil;
+    }
+
+    public void setNomePerfil(String nomePerfil) {
+        this.nomePerfil = nomePerfil;
     }
 }

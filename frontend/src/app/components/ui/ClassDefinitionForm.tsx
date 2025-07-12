@@ -55,7 +55,15 @@ export default function ClassDefinitionForm() {
   };
 
   const handleAdvance = () => {
-    // Logic to save class definition data if needed
+    const classDefinitionData = {
+      disciplina: selectedDiscipline,
+      nivel: selectedLevel,
+      tema: selectedClassTheme,
+      duracao: classDuration,
+      quantidade: classQuantity,
+      recursos: selectedResources,
+    };
+    sessionStorage.setItem('lessonPlanDefinition', JSON.stringify(classDefinitionData));
     router.push('/class-profile');
   };
 

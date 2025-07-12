@@ -17,8 +17,8 @@ export default function ClassProfileForm() {
   const [selectedProfessionalAreas, setSelectedProfessionalAreas] = useState<string[]>([]);
   const [selectedOtherProfiles, setSelectedOtherProfiles] = useState<string[]>([]);
   const [saveProfile, setSaveProfile] = useState(false);
-  const [profileNameInput, setProfileNameInput] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [profileNameInput, setProfileNameInput] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const router = useRouter();
 
@@ -81,7 +81,7 @@ export default function ClassProfileForm() {
     setProfileNameInput('');
   };
 
-  const handleSelectProfile = (profile: any) => {
+  const handleSelectProfile = (profile: ClassProfile) => {
     setClassSize(profile.size);
     setSelectedEducationLevels(profile.education);
     setSelectedAgeRanges(profile.age);
@@ -97,16 +97,18 @@ export default function ClassProfileForm() {
       alert("Por favor, insira um nome para o perfil.");
       return;
     }
-    console.log("Salvar perfil:", {
-      profileName: saveProfile ? profileNameInput : 'Não salvo',
-      classSize,
-      selectedEducationLevels,
-      selectedAgeRanges,
-      selectedLifeContexts,
-      selectedProfessionalAreas,
-      selectedOtherProfiles,
-    });
-    // Implement save logic here
+
+    const classProfileData = {
+      tamanho: classSize,
+      escolarizacao: selectedEducationLevels,
+      faixas: selectedAgeRanges,
+      contextos: selectedLifeContexts,
+      profissoes: selectedProfessionalAreas,
+      outrosPerfis: selectedOtherProfiles,
+      salvarPerfil: saveProfile,
+      nomePerfil: profileNameInput,
+    };
+    sessionStorage.setItem('lessonPlanProfile', JSON.stringify(classProfileData));
     router.push('/observations');
   };
 
