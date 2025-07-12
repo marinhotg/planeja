@@ -1,4 +1,4 @@
-"use client";
+use client";
 
 import PageTitle from "./PageTitle";
 import Image from "next/image";
@@ -11,6 +11,11 @@ export default function GeneratedPlanContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // State for feedback
+  const [rating, setRating] = useState(0); // Initialize with 0 or null, not 4
+  const [comment, setComment] = useState("");
+  const [isFeedbackSubmitted, setIsFeedbackSubmitted] = useState(false);
 
   useEffect(() => {
     const loadLessonPlan = async () => {
@@ -100,6 +105,25 @@ export default function GeneratedPlanContent() {
     ],
   };
 
+  const handleFeedbackSubmit = async () => {
+    if (rating === 0) {
+      alert("Por favor, selecione uma nota antes de avaliar.");
+      return;
+    }
+
+    const feedbackData = {
+      planId: generatedPlan.id,
+      rating,
+      comment,
+    };
+
+    console.log("Enviando feedback:", feedbackData);
+    // TODO: Implement actual feedback submission to backend
+    // await submitFeedback(feedbackData); // This function needs to be created in api.ts
+
+    setIsFeedbackSubmitted(true);
+  };
+
   return (
     <>
       <PageTitle title="Personalize seu plano de aula" subtitle="" />
@@ -128,6 +152,40 @@ export default function GeneratedPlanContent() {
             <p className="text-black text-base leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>{section.content}</p>
           </div>
         ))}
+      </div>
+
+      <div className="w-full p-6 bg-gray-50 mt-6">
+        {isFeedbackSubmitted ? (
+          <div className="w-full p-4 bg-green-100 rounded-md">
+          <p className="text-center text-green-800 font-medium">Você enviou sua avaliação. Obrigado pelo feedback!</p>
+        </div>
+        ) : (
+          <>
+            <h2 className="text-blue-700 text-xl font-bold mb-4">Avalie este plano de aula</h2>
+            <div className="flex items-center mb-4">
+              <span className="text-black text-base mr-2">Sua nota:</span>
+              <div className="flex">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button key={star} onClick={() => setRating(star)} className="w-6 h-6 relative mr-1">
+                    <Image src={star <= rating ? "/filled-star.svg" : "/star.svg"} alt={`${star} star`} layout="fill" />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <textarea
+              placeholder="Deixe seu comentário..."
+              className="w-full h-24 p-2 border border-gray-300 rounded-md mb-4"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            ></textarea>
+            <button
+              onClick={handleFeedbackSubmit}
+              className="w-full bg-blue-700 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-800"
+            >
+              Avaliar
+            </button>
+          </>
+        )}
       </div>
     </>
   );
