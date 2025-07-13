@@ -49,11 +49,11 @@ export default function TemplateSelectionForm() {
             </li>
             <li className="flex items-center text-blue-700">
               <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
-              Conteúdo resumido
+              Metodologia sugerida
             </li>
             <li className="flex items-center text-blue-700">
               <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
-              Duração e recursos necessários
+              Sequência didática
             </li>
           </ul>
         </div>
@@ -75,19 +75,19 @@ export default function TemplateSelectionForm() {
             </li>
             <li className="flex items-center text-blue-700">
               <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
-              Conteúdo completo
-            </li>
-            <li className="flex items-center text-blue-700">
-              <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
               Metodologia sugerida
             </li>
             <li className="flex items-center text-blue-700">
               <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
-              Critérios de avaliação
+              Sequência didática
             </li>
             <li className="flex items-center text-blue-700">
               <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
-              Duração e recursos necessários
+              Recursos necessários
+            </li>
+            <li className="flex items-center text-blue-700">
+              <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
+              Métodos de avaliação
             </li>
           </ul>
         </div>

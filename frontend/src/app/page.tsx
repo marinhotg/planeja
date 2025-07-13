@@ -55,7 +55,7 @@ export default function PlanEJALanding() {
           </Link>
           <div className="flex items-center space-x-3">
             <button
-              className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-md hover:bg-gray-100 transition-colors"
+              className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-md hover:bg-gray-100 transition-colors transition-transform hover:scale-105 active:scale-95 cursor-pointer"
               onClick={() => router.push("/login")}
             >
               Entrar
@@ -84,7 +84,7 @@ export default function PlanEJALanding() {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <button
                     onClick={() => router.push("/login")}
-                    className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white text-lg font-medium rounded-md transition-colors"
+                    className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white text-lg font-medium rounded-md transition-colors transition-transform hover:scale-105 active:scale-95 cursor-pointer"
                   >
                     Comece Agora - É Grátis
                   </button>
@@ -196,7 +196,7 @@ export default function PlanEJALanding() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={() => router.push("/login")}
-                  className="px-8 py-3 bg-white text-green-600 hover:bg-gray-100 text-lg font-medium rounded-md transition-colors"
+                  className="px-8 py-3 bg-white text-green-600 hover:bg-gray-100 text-lg font-medium rounded-md transition-colors transition-transform hover:scale-105 active:scale-95 cursor-pointer"
                 >
                   Começar Agora
                 </button>
