@@ -157,21 +157,32 @@ export default function DashboardContent() {
       )}
 
       <div className="flex justify-center w-full">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-full justify-items-center">
-          {filteredAndSortedPlans.map((plan) => (
-            <PlanCard
-              key={plan.id}
-              id={plan.id}
-              title={plan.title}
-              subtitle={plan.subtitle}
-              onView={handleView}
-              onDownload={handleDownload}
-              onDelete={handleDelete}
-              onFavorite={handleFavorite}
-              favorited={plan.favorited}
-            />
-          ))}
-        </div>
+        {plans.length === 0 ? (
+          <div className="text-center text-gray-500 mt-8">
+            <p>Você ainda não gerou nenhum plano de aula.</p>
+            <p>Clique em <span className="text-blue-700 font-semibold cursor-pointer" onClick={handleGenerateNewPlan}>Gerar novo plano de aula</span> para começar!</p>
+          </div>
+        ) : filteredAndSortedPlans.length === 0 ? (
+          <div className="text-center text-gray-500 mt-8">
+            <p>Nenhum plano encontrado com os filtros aplicados.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-full justify-items-center">
+            {filteredAndSortedPlans.map((plan) => (
+              <PlanCard
+                key={plan.id}
+                id={plan.id}
+                title={plan.title}
+                subtitle={plan.subtitle}
+                onView={handleView}
+                onDownload={handleDownload}
+                onDelete={handleDelete}
+                onFavorite={handleFavorite}
+                favorited={plan.favorited}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </>
   );
