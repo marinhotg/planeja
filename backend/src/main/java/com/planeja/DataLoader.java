@@ -58,7 +58,7 @@ public class DataLoader implements CommandLineRunner {
         LessonPlan testLessonPlan = new LessonPlan();
         testLessonPlan.setUser(testUser);
         testLessonPlan.setDiscipline("Matemática");
-        testLessonPlan.setLevel("Nível I");
+        testLessonPlan.setLevel("Nível I - Ensino Fundamental - Etapa 1 (1º ao 5º ano)");
         testLessonPlan.setTheme("Operações Básicas");
         testLessonPlan.setDurationMinutes(50);
         testLessonPlan.setQuantity(1);

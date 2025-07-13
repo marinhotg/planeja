@@ -25,6 +25,7 @@ public class LessonPlanDTO {
     private LocalDateTime generationTimestamp;
     private Integer rating;
     private String feedbackText;
+    private Boolean favorited;
 
     // Getters and Setters
     public UUID getId() {
@@ -185,5 +186,13 @@ public class LessonPlanDTO {
 
     public void setFeedbackText(String feedbackText) {
         this.feedbackText = feedbackText;
+    }
+
+    public Boolean getFavorited() {
+        return favorited;
+    }
+
+    public void setFavorited(Boolean favorited) {
+        this.favorited = favorited;
     }
 }

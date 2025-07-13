@@ -6,7 +6,9 @@ import PlanCard from "./PlanCard";
 import { useRouter } from 'next/navigation';
 import { useState, useMemo, useEffect } from 'react';
 import FilterBox from "./FilterBox";
-import { fetchLessonPlans, deleteLessonPlan, ParsedGeneratedContent } from '@/lib/api';
+import { fetchLessonPlans, deleteLessonPlan, toggleFavorite, ParsedGeneratedContent, fetchLessonPlanById } from '@/lib/api';
+import { generatePDF, PDFPlanData } from '@/lib/pdfGenerator';
+import LoadingSpinner from "./LoadingSpinner";
 
 interface DisplayPlan {
   id: string;
@@ -21,6 +23,7 @@ export default function DashboardContent() {
   const [plans, setPlans] = useState<DisplayPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const router = useRouter();
 
   const [selectedDisciplineFilter, setSelectedDisciplineFilter] = useState<string>('');
@@ -49,7 +52,7 @@ export default function DashboardContent() {
             subtitle: plan.level, // Using level as subtitle for now
             discipline: plan.discipline,
             date: new Date(plan.generationTimestamp).toLocaleDateString(),
-            favorited: false, // Assuming false for now, as no backend field for this
+            favorited: plan.favorited || false,
           };
         });
         setPlans(displayPlans);
@@ -69,9 +72,55 @@ export default function DashboardContent() {
     router.push('/generated-plan');
   };
 
-  const handleDownload = (id: string) => {
-    console.log(`Baixar plano ${id}`);
-    alert("Download functionality not yet implemented.");
+  const handleDownload = async (id: string) => {
+    try {
+      setDownloadingId(id);
+      
+      // Fetch the complete lesson plan data
+      const lessonPlan = await fetchLessonPlanById(id);
+      
+      // Parse the generatedContent string into an object
+      let parsedContent: ParsedGeneratedContent;
+      try {
+        parsedContent = JSON.parse(lessonPlan.generatedContent);
+      } catch (e) {
+        console.error("Failed to parse generatedContent JSON:", e);
+        alert("Erro ao processar o conteúdo do plano para download.");
+        return;
+      }
+
+      // Transform backend response to frontend display structure
+      const transformedPlan = {
+        title: parsedContent.titulo,
+        sections: [
+          { title: "Objetivo Geral", content: parsedContent.objetivoGeral },
+          { title: "Habilidades da BNCC", content: parsedContent.habilidadesTrabalhadas?.join('; ') || '' },
+          { title: "Metodologia", content: parsedContent.metodologia },
+          { title: "Atividades", content: parsedContent.atividades?.map((activity: { titulo: string; duracao: string; descricao: string }) => `${activity.titulo} (${activity.duracao}): ${activity.descricao}`).join('\n') || '' },
+          { title: "Recursos Necessários", content: parsedContent.recursosNecessarios?.join(', ') || '' },
+          { title: "Métodos de Avaliação", content: parsedContent.metodosDeAvaliacao },
+        ],
+      };
+
+      const pdfData: PDFPlanData = {
+        title: transformedPlan.title,
+        discipline: lessonPlan.discipline,
+        level: lessonPlan.level,
+        theme: lessonPlan.theme,
+        durationMinutes: lessonPlan.durationMinutes,
+        quantity: lessonPlan.quantity,
+        resources: lessonPlan.resources,
+        sections: transformedPlan.sections,
+      };
+
+      await generatePDF(pdfData);
+      alert("PDF gerado com sucesso!");
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao gerar PDF. Por favor, tente novamente.');
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -86,13 +135,16 @@ export default function DashboardContent() {
     }
   };
 
-  const handleFavorite = (id: string) => {
-    console.log(`Favoritar plano ${id}`);
-    // For now, favorited is a local state. If persistence is needed, update backend.
-    setPlans(plans.map(plan =>
-      plan.id === id ? { ...plan, favorited: !plan.favorited } : plan
-    ));
-    alert("Favorite functionality is local only. Not persisted to backend.");
+  const handleFavorite = async (id: string) => {
+    try {
+      const updatedPlan = await toggleFavorite(id);
+      setPlans(plans.map(plan =>
+        plan.id === id ? { ...plan, favorited: updatedPlan.favorited || false } : plan
+      ));
+    } catch (err) {
+      console.error('Erro ao favoritar plano:', err);
+      alert('Erro ao favoritar o plano. Tente novamente.');
+    }
   };
 
   const handleGenerateNewPlan = () => {
@@ -121,11 +173,30 @@ export default function DashboardContent() {
   }, [plans, selectedDisciplineFilter, showFavoritesOnly, sortBy]);
 
   if (loading) {
-    return <p className="text-center text-gray-500 w-full">Carregando planos de aula...</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <LoadingSpinner size="large" color="blue" className="mx-auto mb-4" />
+          <p className="text-gray-600">Carregando planos de aula...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-center text-red-500 w-full">Erro: {error}</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Erro: {error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -179,6 +250,7 @@ export default function DashboardContent() {
                 onDelete={handleDelete}
                 onFavorite={handleFavorite}
                 favorited={plan.favorited}
+                isDownloading={downloadingId === plan.id}
               />
             ))}
           </div>

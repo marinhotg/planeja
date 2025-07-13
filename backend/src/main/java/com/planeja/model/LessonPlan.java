@@ -75,6 +75,9 @@ public class LessonPlan {
     @Column(columnDefinition = "TEXT")
     private String feedbackText;
 
+    @Column(nullable = true)
+    private Boolean favorited = false;
+
     // Constructors
     public LessonPlan() {
         this.generationTimestamp = LocalDateTime.now();
@@ -257,6 +260,14 @@ public class LessonPlan {
 
     public void setFeedbackText(String feedbackText) {
         this.feedbackText = feedbackText;
+    }
+
+    public Boolean getFavorited() {
+        return favorited;
+    }
+
+    public void setFavorited(Boolean favorited) {
+        this.favorited = favorited;
     }
 
     @PreUpdate

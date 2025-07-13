@@ -4,12 +4,15 @@ import PageTitle from "./PageTitle";
 import Image from "next/image";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchLessonPlanById, deleteLessonPlan, GeneratedLessonPlan, ParsedGeneratedContent, submitFeedback } from '@/lib/api';
+import { fetchLessonPlanById, deleteLessonPlan, toggleFavorite, GeneratedLessonPlan, ParsedGeneratedContent, submitFeedback } from '@/lib/api';
+import { generatePDF, PDFPlanData } from '@/lib/pdfGenerator';
+import LoadingSpinner from "./LoadingSpinner";
 
 export default function GeneratedPlanContent() {
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedLessonPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
   const router = useRouter();
 
   // State for feedback
@@ -20,30 +23,104 @@ export default function GeneratedPlanContent() {
   useEffect(() => {
     const loadLessonPlan = async () => {
       const storedPlan = sessionStorage.getItem('generatedLessonPlan');
+      console.log("useEffect: storedPlan from sessionStorage", storedPlan);
+
       if (storedPlan) {
         const parsedPlan: GeneratedLessonPlan = JSON.parse(storedPlan);
+        console.log("useEffect: parsedPlan from sessionStorage", parsedPlan);
+
         // Attempt to fetch from DB to get the latest, or use stored if fetch fails
         try {
           const fetchedPlan = await fetchLessonPlanById(parsedPlan.id);
+          console.log("useEffect: fetchedPlan from DB", fetchedPlan);
           setGeneratedPlan(fetchedPlan);
+          // Check if feedback already exists in fetched plan
+          if (fetchedPlan.rating !== null && fetchedPlan.rating !== undefined) {
+            setRating(fetchedPlan.rating);
+            setComment(fetchedPlan.feedbackText || "");
+            setIsFeedbackSubmitted(true);
+            console.log("useEffect: Feedback found in DB fetched plan. isFeedbackSubmitted set to true.", { rating: fetchedPlan.rating, feedbackText: fetchedPlan.feedbackText });
+          } else {
+            setRating(0);
+            setComment("");
+            setIsFeedbackSubmitted(false);
+            console.log("useEffect: No feedback found in DB fetched plan. isFeedbackSubmitted set to false.");
+          }
         } catch (err) {
           console.warn("Failed to fetch latest lesson plan from DB, using session storage.", err);
           setGeneratedPlan(parsedPlan);
+          // If using stored, check its feedback
+          if (parsedPlan.rating !== null && parsedPlan.rating !== undefined) {
+            setRating(parsedPlan.rating);
+            setComment(parsedPlan.feedbackText || "");
+            setIsFeedbackSubmitted(true);
+            console.log("useEffect: Feedback found in sessionStorage parsed plan. isFeedbackSubmitted set to true.", { rating: parsedPlan.rating, feedbackText: parsedPlan.feedbackText });
+          } else {
+            setRating(0);
+            setComment("");
+            setIsFeedbackSubmitted(false);
+            console.log("useEffect: No feedback found in sessionStorage parsed plan. isFeedbackSubmitted set to false.");
+          }
         } finally {
           setLoading(false);
+          console.log("useEffect: Loading finished.");
         }
       } else {
-        // If no plan is found, redirect back or show a message
+        console.log("useEffect: No plan found in sessionStorage. Redirecting.");
         router.push('/observations'); // Redirect to the previous step
       }
     };
     loadLessonPlan();
   }, [router]);
 
-  const handleDownload = () => {
-    console.log("Baixar plano");
-    // Implement download logic
-    alert("Download functionality not yet implemented.");
+  const handleDownload = async () => {
+    if (!generatedPlan) return;
+    
+    try {
+      setDownloading(true);
+      
+      // Parse the generatedContent string into an object
+      let parsedContent: ParsedGeneratedContent;
+      try {
+        parsedContent = JSON.parse(generatedPlan.generatedContent);
+      } catch (e) {
+        console.error("Failed to parse generatedContent JSON:", e);
+        alert("Erro ao processar o conteúdo do plano para download.");
+        return;
+      }
+
+      // Transform backend response to frontend display structure
+      const transformedPlan = {
+        title: parsedContent.titulo,
+        sections: [
+          { title: "Objetivo Geral", content: parsedContent.objetivoGeral },
+          { title: "Habilidades da BNCC", content: parsedContent.habilidadesTrabalhadas?.join('; ') || '' },
+          { title: "Metodologia", content: parsedContent.metodologia },
+          { title: "Atividades", content: parsedContent.atividades?.map((activity: { titulo: string; duracao: string; descricao: string }) => `${activity.titulo} (${activity.duracao}): ${activity.descricao}`).join('\n') || '' },
+          { title: "Recursos Necessários", content: parsedContent.recursosNecessarios?.join(', ') || '' },
+          { title: "Métodos de Avaliação", content: parsedContent.metodosDeAvaliacao },
+        ],
+      };
+
+      const pdfData: PDFPlanData = {
+        title: transformedPlan.title,
+        discipline: generatedPlan.discipline,
+        level: generatedPlan.level,
+        theme: generatedPlan.theme,
+        durationMinutes: generatedPlan.durationMinutes,
+        quantity: generatedPlan.quantity,
+        resources: generatedPlan.resources,
+        sections: transformedPlan.sections,
+      };
+
+      await generatePDF(pdfData);
+      alert("PDF gerado com sucesso!");
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao gerar PDF. Por favor, tente novamente.');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -64,18 +141,45 @@ export default function GeneratedPlanContent() {
     }
   };
 
-  const handleFavorite = () => {
-    console.log("Favoritar plano");
-    // Implement favorite logic (e.g., update a field in the DB)
-    alert("Favorite functionality not yet implemented.");
+  const handleFavorite = async () => {
+    if (!generatedPlan || !generatedPlan.id) return;
+    
+    try {
+      const updatedPlan = await toggleFavorite(generatedPlan.id);
+      setGeneratedPlan(updatedPlan);
+      // Update session storage with the updated plan
+      sessionStorage.setItem('generatedLessonPlan', JSON.stringify(updatedPlan));
+    } catch (err) {
+      console.error('Erro ao favoritar plano:', err);
+      alert('Erro ao favoritar o plano. Tente novamente.');
+    }
   };
 
   if (loading) {
-    return <p className="text-center text-gray-500 w-full">Carregando plano de aula...</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <LoadingSpinner size="large" color="blue" className="mx-auto mb-4" />
+          <p className="text-gray-600">Carregando plano de aula...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-center text-red-500 w-full">Erro: {error}</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Erro: {error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (!generatedPlan) {
@@ -121,6 +225,10 @@ export default function GeneratedPlanContent() {
     try {
       await submitFeedback(feedbackData);
       alert("Feedback enviado com sucesso!");
+      // Update the local state and session storage with the new feedback
+      const updatedPlan = { ...generatedPlan, rating, feedbackText: comment };
+      setGeneratedPlan(updatedPlan);
+      sessionStorage.setItem('generatedLessonPlan', JSON.stringify(updatedPlan));
       setIsFeedbackSubmitted(true);
     } catch (error) {
       console.error("Erro ao enviar feedback:", error);
@@ -143,15 +251,23 @@ export default function GeneratedPlanContent() {
         <h1 className="text-neutral-800 text-2xl font-bold text-center">Resultado do plano de aula gerado</h1>
       </div>
 
-      <div className="w-full flex justify-center items-center gap-6">
-        <button onClick={handleDownload} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
-          <Image src="/download.svg" alt="Baixar" width={16} height={16} />
+      <div className="w-full flex justify-center items-center gap-6 mb-4">
+        <button 
+          onClick={handleDownload} 
+          disabled={downloading}
+          className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {downloading ? (
+            <LoadingSpinner size="small" color="blue" />
+          ) : (
+            <Image src="/download.svg" alt="Baixar" width={16} height={16} />
+          )}
         </button>
         <button onClick={handleDelete} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
           <Image src="/trash.svg" alt="Deletar" width={16} height={16} />
         </button>
         <button onClick={handleFavorite} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
-          <Image src="/heart.svg" alt="Favoritar" width={16} height={16} />
+          <Image src={generatedPlan.favorited ? "/filled-heart.svg" : "/heart.svg"} alt="Favoritar" width={16} height={16} />
         </button>
       </div>
 
@@ -168,8 +284,21 @@ export default function GeneratedPlanContent() {
       <div className="w-full p-6 bg-gray-50 mt-6">
         {isFeedbackSubmitted ? (
           <div className="w-full p-4 bg-green-100 rounded-md">
-          <p className="text-center text-green-800 font-medium">Você enviou sua avaliação. Obrigado pelo feedback!</p>
-        </div>
+            <p className="text-center text-green-800 font-medium mb-2">Você já avaliou este plano. Obrigado pelo feedback!</p>
+            <div className="flex items-center justify-center mb-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Image
+                  key={star}
+                  src={star <= rating ? "/filled-star.svg" : "/star.svg"}
+                  alt={`${star} star`}
+                  width={24}
+                  height={24}
+                  className="mx-0.5"
+                />
+              ))}
+            </div>
+            {comment && <p className="text-center text-gray-700 text-sm">Comentário: {comment}</p>}
+          </div>
         ) : (
           <>
             <h2 className="text-blue-700 text-xl font-bold mb-4">Avalie este plano de aula</h2>

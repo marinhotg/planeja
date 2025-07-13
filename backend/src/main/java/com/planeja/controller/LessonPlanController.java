@@ -9,6 +9,8 @@ import com.planeja.service.UserService;
 import com.planeja.service.ClassProfileService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +59,7 @@ public class LessonPlanController {
         // This is crucial because GeminiService only populates generatedContent and theme
         generatedLessonPlan.setDiscipline(request.getDisciplina());
         generatedLessonPlan.setLevel(request.getNivel());
+        generatedLessonPlan.setTheme(request.getTema());
         generatedLessonPlan.setDurationMinutes(request.getDuracao());
         generatedLessonPlan.setQuantity(request.getQuantidade());
         try {
@@ -72,11 +75,11 @@ public class LessonPlanController {
         }
         generatedLessonPlan.setClassSize(request.getTamanho());
         try {
-            generatedLessonPlan.setEducationLevels(objectMapper.writeValueAsString(request.getEscolarizacao()));
-            generatedLessonPlan.setAgeRanges(objectMapper.writeValueAsString(request.getFaixas()));
-            generatedLessonPlan.setLifeContexts(objectMapper.writeValueAsString(request.getContextos()));
-            generatedLessonPlan.setProfessionalAreas(objectMapper.writeValueAsString(request.getProfissoes()));
-            generatedLessonPlan.setOtherProfiles(objectMapper.writeValueAsString(request.getOutrosPerfis()));
+            generatedLessonPlan.setEducationLevels((String) objectMapper.writeValueAsString(request.getEscolarizacao()));
+            generatedLessonPlan.setAgeRanges((String) objectMapper.writeValueAsString(request.getFaixas()));
+            generatedLessonPlan.setLifeContexts((String) objectMapper.writeValueAsString(request.getContextos()));
+            generatedLessonPlan.setProfessionalAreas((String) objectMapper.writeValueAsString(request.getProfissoes()));
+            generatedLessonPlan.setOtherProfiles((String) objectMapper.writeValueAsString(request.getOutrosPerfis()));
         } catch (JsonProcessingException e) {
             generatedLessonPlan.setEducationLevels("[]");
             generatedLessonPlan.setAgeRanges("[]");
@@ -94,15 +97,19 @@ public class LessonPlanController {
     }
 
     @GetMapping
-    public List<LessonPlanDTO> getAllLessonPlans() {
-        return lessonPlanService.findAll().stream()
+    public List<LessonPlanDTO> getAllLessonPlans(Authentication authentication) {
+        User currentUser = ((com.planeja.model.UserDetailsImpl) authentication.getPrincipal()).getUser();
+        UUID userId = currentUser.getId();
+        return lessonPlanService.findAllByUserId(userId).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LessonPlanDTO> getLessonPlanById(@PathVariable UUID id) {
-        Optional<LessonPlan> lessonPlan = lessonPlanService.findById(id);
+    public ResponseEntity<LessonPlanDTO> getLessonPlanById(@PathVariable UUID id, Authentication authentication) {
+        User currentUser = ((com.planeja.model.UserDetailsImpl) authentication.getPrincipal()).getUser();
+        UUID userId = currentUser.getId();
+        Optional<LessonPlan> lessonPlan = lessonPlanService.findByIdAndUserId(id, userId);
         return lessonPlan.map(lp -> ResponseEntity.ok(convertToDto(lp)))
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -119,8 +126,10 @@ public class LessonPlanController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<LessonPlanDTO> updateLessonPlan(@PathVariable UUID id, @RequestBody LessonPlanDTO lessonPlanDTO) {
-        Optional<LessonPlan> existingLessonPlan = lessonPlanService.findById(id);
+    public ResponseEntity<LessonPlanDTO> updateLessonPlan(@PathVariable UUID id, @RequestBody LessonPlanDTO lessonPlanDTO, Authentication authentication) {
+        User currentUser = ((com.planeja.model.UserDetailsImpl) authentication.getPrincipal()).getUser();
+        UUID userId = currentUser.getId();
+        Optional<LessonPlan> existingLessonPlan = lessonPlanService.findByIdAndUserId(id, userId);
         if (existingLessonPlan.isPresent()) {
             try {
                 LessonPlan lessonPlan = existingLessonPlan.get();
@@ -132,11 +141,11 @@ public class LessonPlanController {
                 lessonPlan.setQuantity(lessonPlanDTO.getQuantity());
                 lessonPlan.setResources(objectMapper.writeValueAsString(lessonPlanDTO.getResources()));
                 lessonPlan.setClassSize(lessonPlanDTO.getClassSize());
-                lessonPlan.setEducationLevels(objectMapper.writeValueAsString(lessonPlanDTO.getEducationLevels()));
-                lessonPlan.setAgeRanges(objectMapper.writeValueAsString(lessonPlanDTO.getAgeRanges()));
-                lessonPlan.setLifeContexts(objectMapper.writeValueAsString(lessonPlanDTO.getLifeContexts()));
-                lessonPlan.setProfessionalAreas(objectMapper.writeValueAsString(lessonPlanDTO.getProfessionalAreas()));
-                lessonPlan.setOtherProfiles(objectMapper.writeValueAsString(lessonPlanDTO.getOtherProfiles()));
+                lessonPlan.setEducationLevels((String) objectMapper.writeValueAsString(lessonPlanDTO.getEducationLevels()));
+                lessonPlan.setAgeRanges((String) objectMapper.writeValueAsString(lessonPlanDTO.getAgeRanges()));
+                lessonPlan.setLifeContexts((String) objectMapper.writeValueAsString(lessonPlanDTO.getLifeContexts()));
+                lessonPlan.setProfessionalAreas((String) objectMapper.writeValueAsString(lessonPlanDTO.getProfessionalAreas()));
+                lessonPlan.setOtherProfiles((String) objectMapper.writeValueAsString(lessonPlanDTO.getOtherProfiles()));
                 lessonPlan.setObservations(lessonPlanDTO.getObservations());
                 lessonPlan.setGeneratedContent(lessonPlanDTO.getGeneratedContent());
 
@@ -159,18 +168,21 @@ public class LessonPlanController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteLessonPlan(@PathVariable UUID id) {
-        if (lessonPlanService.findById(id).isPresent()) {
+    public ResponseEntity<Void> deleteLessonPlan(@PathVariable UUID id, Authentication authentication) {
+        User currentUser = ((com.planeja.model.UserDetailsImpl) authentication.getPrincipal()).getUser();
+        UUID userId = currentUser.getId();
+        if (lessonPlanService.findByIdAndUserId(id, userId).isPresent()) {
             lessonPlanService.deleteById(id);
             return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}/feedback")
-    public ResponseEntity<LessonPlanDTO> submitFeedback(@PathVariable UUID id, @RequestBody LessonPlanDTO lessonPlanDTO) {
-        Optional<LessonPlan> existingLessonPlan = lessonPlanService.findById(id);
+    public ResponseEntity<LessonPlanDTO> submitFeedback(@PathVariable UUID id, @RequestBody LessonPlanDTO lessonPlanDTO, Authentication authentication) {
+        User currentUser = ((com.planeja.model.UserDetailsImpl) authentication.getPrincipal()).getUser();
+        UUID userId = currentUser.getId();
+        Optional<LessonPlan> existingLessonPlan = lessonPlanService.findByIdAndUserId(id, userId);
         if (existingLessonPlan.isPresent()) {
             LessonPlan lessonPlan = existingLessonPlan.get();
             if (lessonPlanDTO.getRating() != null) {
@@ -181,9 +193,22 @@ public class LessonPlanController {
             }
             LessonPlan updatedLessonPlan = lessonPlanService.save(lessonPlan);
             return ResponseEntity.ok(convertToDto(updatedLessonPlan));
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{id}/favorite")
+    public ResponseEntity<LessonPlanDTO> toggleFavorite(@PathVariable UUID id, Authentication authentication) {
+        User currentUser = ((com.planeja.model.UserDetailsImpl) authentication.getPrincipal()).getUser();
+        UUID userId = currentUser.getId();
+        Optional<LessonPlan> existingLessonPlan = lessonPlanService.findByIdAndUserId(id, userId);
+        if (existingLessonPlan.isPresent()) {
+            LessonPlan lessonPlan = existingLessonPlan.get();
+            lessonPlan.setFavorited(!lessonPlan.getFavorited());
+            LessonPlan updatedLessonPlan = lessonPlanService.save(lessonPlan);
+            return ResponseEntity.ok(convertToDto(updatedLessonPlan));
+        }
+        return ResponseEntity.notFound().build();
     }
 
     private LessonPlanDTO convertToDto(LessonPlan lessonPlan) {
@@ -220,6 +245,9 @@ public class LessonPlanController {
         dto.setObservations(lessonPlan.getObservations());
         dto.setGeneratedContent(lessonPlan.getGeneratedContent());
         dto.setGenerationTimestamp(lessonPlan.getGenerationTimestamp());
+        dto.setRating(lessonPlan.getRating());
+        dto.setFeedbackText(lessonPlan.getFeedbackText());
+        dto.setFavorited(lessonPlan.getFavorited());
         return dto;
     }
 
@@ -241,16 +269,17 @@ public class LessonPlanController {
             classProfileService.findById(dto.getClassProfileId()).ifPresent(lessonPlan::setClassProfile);
         }
         lessonPlan.setClassSize(dto.getClassSize());
-        lessonPlan.setEducationLevels(objectMapper.writeValueAsString(dto.getEducationLevels()));
-        lessonPlan.setAgeRanges(objectMapper.writeValueAsString(dto.getAgeRanges()));
-        lessonPlan.setLifeContexts(objectMapper.writeValueAsString(dto.getLifeContexts()));
-        lessonPlan.setProfessionalAreas(objectMapper.writeValueAsString(dto.getProfessionalAreas()));
-        lessonPlan.setOtherProfiles(objectMapper.writeValueAsString(dto.getOtherProfiles()));
+        lessonPlan.setEducationLevels((String) objectMapper.writeValueAsString(dto.getEducationLevels()));
+        lessonPlan.setAgeRanges((String) objectMapper.writeValueAsString(dto.getAgeRanges()));
+        lessonPlan.setLifeContexts((String) objectMapper.writeValueAsString(dto.getLifeContexts()));
+        lessonPlan.setProfessionalAreas((String) objectMapper.writeValueAsString(dto.getProfessionalAreas()));
+        lessonPlan.setOtherProfiles((String) objectMapper.writeValueAsString(dto.getOtherProfiles()));
         lessonPlan.setObservations(dto.getObservations());
         lessonPlan.setGeneratedContent(dto.getGeneratedContent());
         lessonPlan.setGenerationTimestamp(dto.getGenerationTimestamp());
         lessonPlan.setRating(dto.getRating());
         lessonPlan.setFeedbackText(dto.getFeedbackText());
+        lessonPlan.setFavorited(dto.getFavorited());
         return lessonPlan;
     }
 }

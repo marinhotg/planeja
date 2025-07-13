@@ -8,9 +8,10 @@ import InputLabel from "./InputLabel";
 import TextInput from "./TextInput";
 import ProfileSelectionModal from './ProfileSelectionModal';
 import { useRouter } from 'next/navigation';
-import { fetchConfigurations, ConfigurationResponse } from '@/lib/api';
+import { fetchConfigurations, ConfigurationResponse, createClassProfile, ClassProfileRequest } from '@/lib/api';
 import MultiSelectButtons from "./MultiSelectButtons";
 import { UIClassProfile, isCompleteProfile } from '@/types/profile';
+import LoadingSpinner from "./LoadingSpinner";
 
 export default function ClassProfileForm() {
   const [classSize, setClassSize] = useState<number | null>(null);
@@ -25,6 +26,7 @@ export default function ClassProfileForm() {
   const [configurations, setConfigurations] = useState<ConfigurationResponse | null>(null);
   const [loadingConfigs, setLoadingConfigs] = useState(true);
   const [errorConfigs, setErrorConfigs] = useState<string | null>(null);
+  const [savingProfile, setSavingProfile] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   const router = useRouter();
@@ -91,6 +93,7 @@ export default function ClassProfileForm() {
     setSelectedOtherProfiles([]);
     setSaveProfile(false);
     setProfileNameInput('');
+    setFormError(null);
   };
 
   // Função handleSelectProfile usando o type guard compartilhado
@@ -110,7 +113,8 @@ export default function ClassProfileForm() {
     }
   };
 
-  const handleAdvance = () => {
+  const handleAdvance = async () => {
+    // Validações da main
     if (!classSize || classSize <= 0) {
       setFormError("Por favor, preencha o tamanho da turma.");
       return;
@@ -122,6 +126,30 @@ export default function ClassProfileForm() {
     }
 
     setFormError(null);
+
+    // Se o usuário escolheu salvar o perfil, criar o perfil no backend
+    if (saveProfile && profileNameInput.trim() !== '') {
+      setSavingProfile(true);
+      try {
+        const profileData: ClassProfileRequest = {
+          profileName: profileNameInput.trim(),
+          size: classSize || undefined,
+          educationLevels: selectedEducationLevels.length > 0 ? selectedEducationLevels : undefined,
+          ageRanges: selectedAgeRanges.length > 0 ? selectedAgeRanges : undefined,
+          lifeContexts: selectedLifeContexts.length > 0 ? selectedLifeContexts : undefined,
+          professionalAreas: selectedProfessionalAreas.length > 0 ? selectedProfessionalAreas : undefined,
+          otherProfiles: selectedOtherProfiles.length > 0 ? selectedOtherProfiles : undefined,
+        };
+
+        await createClassProfile(profileData);
+        console.log('Perfil de turma salvo com sucesso');
+      } catch (error) {
+        console.error('Erro ao salvar perfil de turma:', error);
+        alert('Erro ao salvar o perfil de turma. Continuando com a criação do plano...');
+      } finally {
+        setSavingProfile(false);
+      }
+    }
 
     const classProfileData = {
       tamanho: classSize,
@@ -138,11 +166,30 @@ export default function ClassProfileForm() {
   };
 
   if (loadingConfigs) {
-    return <p className="text-center text-gray-500 w-full">Loading configurations...</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <LoadingSpinner size="large" color="blue" className="mx-auto mb-4" />
+          <p className="text-gray-600">Carregando configurações...</p>
+        </div>
+      </div>
+    );
   }
 
   if (errorConfigs) {
-    return <p className="text-center text-red-500 w-full">Error: {errorConfigs}</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Erro: {errorConfigs}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -242,7 +289,9 @@ export default function ClassProfileForm() {
 
         <div className="w-full">
           {formError && <p className="text-red-500 text-sm mb-8 text-center">{formError}</p>}
-          <Button className="w-full" onClick={handleAdvance}>Avançar</Button>
+          <Button className="w-full" onClick={handleAdvance} disabled={savingProfile}>
+            {savingProfile ? 'Salvando perfil...' : 'Avançar'}
+          </Button>
         </div>
       </div>
 

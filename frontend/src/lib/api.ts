@@ -41,6 +41,7 @@ export interface GeneratedLessonPlan {
   generationTimestamp: string;
   rating?: number;
   feedbackText?: string;
+  favorited?: boolean;
 }
 
 export interface FeedbackRequest {
@@ -76,7 +77,6 @@ export interface ClassProfile {
 }
 
 export interface ClassProfileRequest {
-  userId: string; // Assuming userId will be passed from frontend or derived from auth
   profileName: string;
   size?: number;
   educationLevels?: string[];
@@ -154,7 +154,11 @@ export const deleteClassProfile = async (id: string): Promise<void> => {
 };
 
 export const fetchClassProfileById = async (id: string): Promise<ClassProfile> => {
-  const response = await api.get(`/api/class-profiles/${id}`);
+  const session = await getSession();
+  if (!session || !session.user || !session.user.id) {
+    throw new Error("User not authenticated.");
+  }
+  const response = await api.get(`/api/class-profiles/${id}?userId=${session.user.id}`);
   return response.data;
 };
 
@@ -165,4 +169,9 @@ export const fetchConfigurations = async (): Promise<ConfigurationResponse> => {
 
 export const submitFeedback = async (feedbackData: FeedbackRequest): Promise<void> => {
   await api.put(`/api/lesson-plans/${feedbackData.planId}/feedback`, { rating: feedbackData.rating, feedbackText: feedbackData.comment });
+};
+
+export const toggleFavorite = async (planId: string): Promise<GeneratedLessonPlan> => {
+  const response = await api.put(`/api/lesson-plans/${planId}/favorite`);
+  return response.data;
 };

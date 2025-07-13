@@ -7,6 +7,7 @@ import Button from "./Button";
 import { useRouter } from 'next/navigation';
 import { generateLessonPlan, saveLessonPlan, LessonPlanRequest, GeneratedLessonPlan } from '@/lib/api';
 import { useSession } from 'next-auth/react';
+import PlanGenerationLoading from './PlanGenerationLoading';
 
 export default function ObservationsForm() {
   const [observations, setObservations] = useState('');
@@ -64,6 +65,8 @@ export default function ObservationsForm() {
 
   return (
     <>
+      <PlanGenerationLoading isVisible={loading} />
+      
       <PageTitle title="Personalize seu plano de aula" subtitle="Template > Aula > Perfil da turma > Observações" />
 
       <Navbar title="Observações" onClear={handleClear} />
