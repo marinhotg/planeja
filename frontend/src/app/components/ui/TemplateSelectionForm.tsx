@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 
 export default function TemplateSelectionForm() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleTemplateClick = (template: string) => {
@@ -16,6 +17,10 @@ export default function TemplateSelectionForm() {
   };
 
   const handleAdvance = () => {
+    if (!selectedTemplate) {
+      setError("Por favor, selecione um template para avançar.");
+      return;
+    }
     // Logic to save selected template if needed
     router.push('/class-definition');
   };
@@ -44,11 +49,11 @@ export default function TemplateSelectionForm() {
             </li>
             <li className="flex items-center text-blue-700">
               <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
-              Conteúdo resumido
+              Metodologia sugerida
             </li>
             <li className="flex items-center text-blue-700">
               <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
-              Duração e recursos necessários
+              Sequência didática
             </li>
           </ul>
         </div>
@@ -70,24 +75,27 @@ export default function TemplateSelectionForm() {
             </li>
             <li className="flex items-center text-blue-700">
               <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
-              Conteúdo completo
-            </li>
-            <li className="flex items-center text-blue-700">
-              <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
               Metodologia sugerida
             </li>
             <li className="flex items-center text-blue-700">
               <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
-              Critérios de avaliação
+              Sequência didática
             </li>
             <li className="flex items-center text-blue-700">
               <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
-              Duração e recursos necessários
+              Recursos necessários
+            </li>
+            <li className="flex items-center text-blue-700">
+              <Image src="/checkmark-icon.svg" alt="Check" width={16} height={16} className="mr-2" />
+              Métodos de avaliação
             </li>
           </ul>
         </div>
       </div>
-      <Button className="w-full mt-8" onClick={handleAdvance}>Avançar</Button>
+      <div className="w-full">
+        {error && <p className="text-red-500 text-sm mb-8 text-center">{error}</p>}
+        <Button className="w-full" onClick={handleAdvance}>Avançar</Button>
+      </div>
     </>
   );
 }

@@ -26,6 +26,7 @@ export default function ClassProfileForm() {
   const [loadingConfigs, setLoadingConfigs] = useState(true);
   const [errorConfigs, setErrorConfigs] = useState<string | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -91,6 +92,7 @@ export default function ClassProfileForm() {
     setSelectedOtherProfiles([]);
     setSaveProfile(false);
     setProfileNameInput('');
+    setFormError(null);
   };
 
   // Função handleSelectProfile usando o type guard compartilhado
@@ -111,10 +113,18 @@ export default function ClassProfileForm() {
   };
 
   const handleAdvance = async () => {
-    if (saveProfile && profileNameInput.trim() === '') {
-      alert("Por favor, insira um nome para o perfil.");
+    // Validações da main
+    if (!classSize || classSize <= 0) {
+      setFormError("Por favor, preencha o tamanho da turma.");
       return;
     }
+
+    if (saveProfile && profileNameInput.trim() === '') {
+      setFormError("Por favor, insira um nome para o perfil.");
+      return;
+    }
+
+    setFormError(null);
 
     // Se o usuário escolheu salvar o perfil, criar o perfil no backend
     if (saveProfile && profileNameInput.trim() !== '') {
@@ -182,7 +192,7 @@ export default function ClassProfileForm() {
             type="number"
             placeholder="Ex: 20"
             value={classSize === null ? '' : classSize}
-            onChange={(e) => setClassSize(Number(e.target.value))}
+            onChange={(e) => setClassSize(e.target.value === '' ? null : Number(e.target.value))}
             min="1"
           />
         </div>
@@ -257,9 +267,12 @@ export default function ClassProfileForm() {
           </div>
         )}
 
-        <Button className="w-full mt-8" onClick={handleAdvance} disabled={savingProfile}>
-          {savingProfile ? 'Salvando perfil...' : 'Avançar'}
-        </Button>
+        <div className="w-full">
+          {formError && <p className="text-red-500 text-sm mb-8 text-center">{formError}</p>}
+          <Button className="w-full" onClick={handleAdvance} disabled={savingProfile}>
+            {savingProfile ? 'Salvando perfil...' : 'Avançar'}
+          </Button>
+        </div>
       </div>
 
       <ProfileSelectionModal

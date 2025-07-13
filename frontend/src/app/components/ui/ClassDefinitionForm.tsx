@@ -20,6 +20,7 @@ export default function ClassDefinitionForm() {
   const [configurations, setConfigurations] = useState<ConfigurationResponse | null>(null); // Store fetched configurations
   const [loadingConfigs, setLoadingConfigs] = useState(true);
   const [errorConfigs, setErrorConfigs] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -68,6 +69,21 @@ export default function ClassDefinitionForm() {
   };
 
   const handleAdvance = () => {
+    if (
+      !selectedDiscipline ||
+      !selectedLevel ||
+      !selectedClassTheme ||
+      !classDuration ||
+      classDuration <= 0 ||
+      !classQuantity ||
+      classQuantity <= 0
+    ) {
+      setFormError("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    setFormError(null);
+
     const classDefinitionData = {
       disciplina: selectedDiscipline,
       nivel: selectedLevel,
@@ -170,7 +186,7 @@ export default function ClassDefinitionForm() {
             type="number"
             placeholder="Ex: 50"
             value={classDuration === null ? '' : classDuration}
-            onChange={(e) => setClassDuration(Number(e.target.value))}
+            onChange={(e) => setClassDuration(e.target.value === '' ? null : Number(e.target.value))}
             min="0"
           />
         </div>
@@ -184,7 +200,7 @@ export default function ClassDefinitionForm() {
             type="number"
             placeholder="Ex:2"
             value={classQuantity === null ? '' : classQuantity}
-            onChange={(e) => setClassQuantity(Number(e.target.value))}
+            onChange={(e) => setClassQuantity(e.target.value === '' ? null : Number(e.target.value))}
             min="1"
           />
         </div>
@@ -198,7 +214,10 @@ export default function ClassDefinitionForm() {
           onAddNewOption={handleAddNewResource}
         />
 
-      <Button className="w-full mt-8" onClick={handleAdvance}>Avançar</Button>
+        <div className="w-full">
+          {formError && <p className="text-red-500 text-sm mb-8 text-center">{formError}</p>}
+          <Button className="w-full" onClick={handleAdvance}>Avançar</Button>
+        </div>
       </div>
     </>
   );

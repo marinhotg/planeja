@@ -43,11 +43,6 @@ export default function Header() {
     setShowMenu(false);
   };
 
-  const handleHistory = () => {
-    router.push('/dashboard');
-    setShowMenu(false);
-  };
-
   const handleManageClassProfiles = () => {
     router.push('/manage-class-profiles');
     setShowMenu(false);
@@ -71,12 +66,6 @@ export default function Header() {
                     Gerar novo plano de aula
                   </button>
                   <button
-                    onClick={handleHistory}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                  >
-                    Histórico
-                  </button>
-                  <button
                     onClick={handleManageClassProfiles}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                   >
@@ -87,10 +76,10 @@ export default function Header() {
             </div>
           )}
 
-          <div className="flex items-center gap-4 text-center text-white text-3xl font-bold font-inter">
+          <button onClick={() => router.push('/dashboard')} className="flex items-center gap-4 text-center text-white text-3xl font-bold font-inter cursor-pointer">
             <Image src="/logo.png" alt="PlanEJA logo" width={36} height={36} />
             PlanEJA
-          </div>
+          </button>
 
           {!isAuthPage && session && (
             <div className="relative" ref={userMenuRef}>
