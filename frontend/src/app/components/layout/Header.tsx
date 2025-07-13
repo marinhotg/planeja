@@ -43,11 +43,6 @@ export default function Header() {
     setShowMenu(false);
   };
 
-  const handleHistory = () => {
-    router.push('/dashboard');
-    setShowMenu(false);
-  };
-
   const handleManageClassProfiles = () => {
     router.push('/manage-class-profiles');
     setShowMenu(false);

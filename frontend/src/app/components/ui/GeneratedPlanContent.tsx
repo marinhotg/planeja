@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchLessonPlanById, deleteLessonPlan, GeneratedLessonPlan, ParsedGeneratedContent, submitFeedback } from '@/lib/api';
-import Button from "./Button";
 
 export default function GeneratedPlanContent() {
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedLessonPlan | null>(null);
