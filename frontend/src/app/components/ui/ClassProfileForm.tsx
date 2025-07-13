@@ -8,7 +8,7 @@ import InputLabel from "./InputLabel";
 import TextInput from "./TextInput";
 import ProfileSelectionModal from './ProfileSelectionModal';
 import { useRouter } from 'next/navigation';
-import { fetchConfigurations, ConfigurationResponse } from '@/lib/api';
+import { fetchConfigurations, ConfigurationResponse, createClassProfile, ClassProfileRequest } from '@/lib/api';
 import MultiSelectButtons from "./MultiSelectButtons";
 import { UIClassProfile, isCompleteProfile } from '@/types/profile';
 
@@ -25,6 +25,7 @@ export default function ClassProfileForm() {
   const [configurations, setConfigurations] = useState<ConfigurationResponse | null>(null);
   const [loadingConfigs, setLoadingConfigs] = useState(true);
   const [errorConfigs, setErrorConfigs] = useState<string | null>(null);
+  const [savingProfile, setSavingProfile] = useState(false);
 
   const router = useRouter();
 
@@ -109,10 +110,34 @@ export default function ClassProfileForm() {
     }
   };
 
-  const handleAdvance = () => {
+  const handleAdvance = async () => {
     if (saveProfile && profileNameInput.trim() === '') {
       alert("Por favor, insira um nome para o perfil.");
       return;
+    }
+
+    // Se o usuário escolheu salvar o perfil, criar o perfil no backend
+    if (saveProfile && profileNameInput.trim() !== '') {
+      setSavingProfile(true);
+      try {
+        const profileData: ClassProfileRequest = {
+          profileName: profileNameInput.trim(),
+          size: classSize || undefined,
+          educationLevels: selectedEducationLevels.length > 0 ? selectedEducationLevels : undefined,
+          ageRanges: selectedAgeRanges.length > 0 ? selectedAgeRanges : undefined,
+          lifeContexts: selectedLifeContexts.length > 0 ? selectedLifeContexts : undefined,
+          professionalAreas: selectedProfessionalAreas.length > 0 ? selectedProfessionalAreas : undefined,
+          otherProfiles: selectedOtherProfiles.length > 0 ? selectedOtherProfiles : undefined,
+        };
+
+        await createClassProfile(profileData);
+        console.log('Perfil de turma salvo com sucesso');
+      } catch (error) {
+        console.error('Erro ao salvar perfil de turma:', error);
+        alert('Erro ao salvar o perfil de turma. Continuando com a criação do plano...');
+      } finally {
+        setSavingProfile(false);
+      }
     }
 
     const classProfileData = {
@@ -232,7 +257,9 @@ export default function ClassProfileForm() {
           </div>
         )}
 
-        <Button className="w-full mt-8" onClick={handleAdvance}>Avançar</Button>
+        <Button className="w-full mt-8" onClick={handleAdvance} disabled={savingProfile}>
+          {savingProfile ? 'Salvando perfil...' : 'Avançar'}
+        </Button>
       </div>
 
       <ProfileSelectionModal
