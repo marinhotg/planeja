@@ -71,12 +71,6 @@ export default function Header() {
                     Gerar novo plano de aula
                   </button>
                   <button
-                    onClick={handleHistory}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                  >
-                    Histórico
-                  </button>
-                  <button
                     onClick={handleManageClassProfiles}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                   >
