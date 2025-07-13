@@ -43,7 +43,6 @@ export default function ClassDefinitionForm() {
   const disciplines = configurations?.disciplines || [];
   const levels = configurations?.levels || [];
   const resources = configurations?.resources || [];
-  const themesByDiscipline = configurations?.themesByDiscipline || {};
 
   const handleResourceChange = (resource: string) => {
     setSelectedResources((prev) =>
@@ -159,22 +158,13 @@ export default function ClassDefinitionForm() {
         {/* Tema da aula */}
         <div className="self-stretch flex flex-col justify-start items-start gap-2">
           <InputLabel htmlFor="classTheme">Tema da aula</InputLabel>
-          <div className="relative w-full">
-            <select
-              id="classTheme"
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700"
-              value={selectedClassTheme || ''}
-              onChange={(e) => setSelectedClassTheme(e.target.value)}
-              disabled={!selectedDiscipline} // Disable if no discipline is selected
-            >
-              <option value="" className="text-gray-500">{selectedDiscipline ? 'Selecione um tema' : 'Selecione uma disciplina primeiro'}</option>
-              {selectedDiscipline && themesByDiscipline[selectedDiscipline]?.map((theme) => (
-                <option key={theme} value={theme}>
-                  {theme}
-                </option>
-              ))}
-            </select>
-          </div>
+          <TextInput
+            id="classTheme"
+            type="text"
+            placeholder="Ex: Operações básicas, Gramática, História do Brasil..."
+            value={selectedClassTheme || ''}
+            onChange={(e) => setSelectedClassTheme(e.target.value)}
+          />
         </div>
         <div className="self-stretch border-b border-gray-200 my-2"></div>
 

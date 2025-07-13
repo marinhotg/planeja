@@ -1,13 +1,11 @@
 package com.planeja.dto;
 
 import java.util.List;
-import java.util.Map;
 
 public class ConfigurationResponse {
     private List<String> disciplines;
     private List<String> levels;
     private List<String> resources;
-    private Map<String, List<String>> themesByDiscipline;
     private List<String> educationLevels;
     private List<String> ageRanges;
     private List<String> lifeContexts;
@@ -37,14 +35,6 @@ public class ConfigurationResponse {
 
     public void setResources(List<String> resources) {
         this.resources = resources;
-    }
-
-    public Map<String, List<String>> getThemesByDiscipline() {
-        return themesByDiscipline;
-    }
-
-    public void setThemesByDiscipline(Map<String, List<String>> themesByDiscipline) {
-        this.themesByDiscipline = themesByDiscipline;
     }
 
     public List<String> getEducationLevels() {

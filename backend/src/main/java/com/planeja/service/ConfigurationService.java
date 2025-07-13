@@ -31,17 +31,6 @@ public class ConfigurationService {
                 "Quadro e giz/lousa", "Projetor", "TV/DVD", "Livros", "Computadores", "Papel e canetas"
         ));
 
-        // Themes by Discipline
-        Map<String, List<String>> themesByDiscipline = new HashMap<>();
-        themesByDiscipline.put("Matemática", Arrays.asList("Álgebra", "Geometria", "Cálculo"));
-        themesByDiscipline.put("Português", Arrays.asList("Gramática", "Literatura", "Redação"));
-        themesByDiscipline.put("História", Arrays.asList("Antiguidade", "Idade Média", "Brasil Colonial"));
-        themesByDiscipline.put("Geografia", Arrays.asList("Geografia Física", "Geografia Humana", "Cartografia"));
-        themesByDiscipline.put("Ciências", Arrays.asList("Biologia", "Química", "Física"));
-        themesByDiscipline.put("Artes", Arrays.asList("Pintura", "Escultura", "Música"));
-        themesByDiscipline.put("Educação Física", Arrays.asList("Esportes", "Dança", "Saúde"));
-        config.setThemesByDiscipline(themesByDiscipline);
-
         // Education Levels
         config.setEducationLevels(Arrays.asList(
                 "Reintegração escolar", "Multissérie", "Interesse em temas práticos", "Alfabetização", "Experiência com tecnologia"
