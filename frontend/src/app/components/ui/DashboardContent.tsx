@@ -8,6 +8,7 @@ import { useState, useMemo, useEffect } from 'react';
 import FilterBox from "./FilterBox";
 import { fetchLessonPlans, deleteLessonPlan, toggleFavorite, ParsedGeneratedContent, fetchLessonPlanById } from '@/lib/api';
 import { generatePDF, PDFPlanData } from '@/lib/pdfGenerator';
+import LoadingSpinner from "./LoadingSpinner";
 
 interface DisplayPlan {
   id: string;
@@ -172,11 +173,30 @@ export default function DashboardContent() {
   }, [plans, selectedDisciplineFilter, showFavoritesOnly, sortBy]);
 
   if (loading) {
-    return <p className="text-center text-gray-500 w-full">Carregando planos de aula...</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <LoadingSpinner size="large" color="blue" className="mx-auto mb-4" />
+          <p className="text-gray-600">Carregando planos de aula...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-center text-red-500 w-full">Erro: {error}</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Erro: {error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

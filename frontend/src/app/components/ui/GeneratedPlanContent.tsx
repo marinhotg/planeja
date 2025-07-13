@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchLessonPlanById, deleteLessonPlan, toggleFavorite, GeneratedLessonPlan, ParsedGeneratedContent, submitFeedback } from '@/lib/api';
 import { generatePDF, PDFPlanData } from '@/lib/pdfGenerator';
+import LoadingSpinner from "./LoadingSpinner";
 
 export default function GeneratedPlanContent() {
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedLessonPlan | null>(null);
@@ -155,11 +156,30 @@ export default function GeneratedPlanContent() {
   };
 
   if (loading) {
-    return <p className="text-center text-gray-500 w-full">Carregando plano de aula...</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <LoadingSpinner size="large" color="blue" className="mx-auto mb-4" />
+          <p className="text-gray-600">Carregando plano de aula...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-center text-red-500 w-full">Erro: {error}</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Erro: {error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (!generatedPlan) {
@@ -238,7 +258,7 @@ export default function GeneratedPlanContent() {
           className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {downloading ? (
-            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <LoadingSpinner size="small" color="blue" />
           ) : (
             <Image src="/download.svg" alt="Baixar" width={16} height={16} />
           )}

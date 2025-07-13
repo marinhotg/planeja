@@ -1,5 +1,6 @@
 import Image from "next/image";
 import React from 'react';
+import LoadingSpinner from "./LoadingSpinner";
 
 interface PlanCardProps {
   id: string; // Changed from number to string
@@ -44,7 +45,7 @@ export default function PlanCard({
               className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isDownloading ? (
-                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <LoadingSpinner size="small" color="blue" />
               ) : (
                 <Image src="/download.svg" alt="Baixar" width={16} height={16} />
               )}
