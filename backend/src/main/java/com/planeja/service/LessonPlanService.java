@@ -26,12 +26,12 @@ public class LessonPlanService {
     @Autowired
     private GeminiService geminiService;
 
-    public List<LessonPlan> findAll() {
-        return lessonPlanRepository.findAll();
+    public List<LessonPlan> findAllByUserId(UUID userId) {
+        return lessonPlanRepository.findByUserId(userId);
     }
 
-    public Optional<LessonPlan> findById(UUID id) {
-        return lessonPlanRepository.findById(id);
+    public Optional<LessonPlan> findByIdAndUserId(UUID id, UUID userId) {
+        return lessonPlanRepository.findByIdAndUserId(id, userId);
     }
 
     public LessonPlan save(LessonPlan lessonPlan) {
