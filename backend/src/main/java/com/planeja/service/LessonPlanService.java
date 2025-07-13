@@ -43,15 +43,36 @@ public class LessonPlanService {
     }
 
     public LessonPlan generateLessonPlan(LessonPlanRequest request) {
+        String nivelEnsino = mapNivelToBNCCFormat(request.getNivel());
+        
         List<BNCCContent> habilidades = bnccService.searchForEJA(
                 request.getTema(),
                 request.getDisciplina(),
-                "ensino_fundamental",
+                nivelEnsino,
                 List.of() // Adicionado o quarto argumento como uma lista vazia
         );
 
         String prompt = promptBuilder.buildPrompt(request, habilidades);
 
         return geminiService.generatePlan(prompt);
+    }
+
+    /**
+     * Mapeia o nível explícito do frontend para o formato esperado pela BNCC
+     */
+    private String mapNivelToBNCCFormat(String nivel) {
+        if (nivel == null) {
+            return "ensino_fundamental";
+        }
+        
+        if (nivel.contains("Nível I") || nivel.contains("1º ao 5º")) {
+            return "ensino_fundamental";
+        } else if (nivel.contains("Nível II") || nivel.contains("6º ao 9º")) {
+            return "ensino_fundamental";
+        } else if (nivel.contains("Nível III") || nivel.contains("Ensino Médio")) {
+            return "ensino_medio";
+        }
+        
+        return "ensino_fundamental"; // fallback
     }
 }

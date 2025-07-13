@@ -21,7 +21,9 @@ public class ConfigurationService {
 
         // Levels
         config.setLevels(Arrays.asList(
-                "Nível I", "Nível II", "Nível III"
+                "Nível I - Ensino Fundamental - Etapa 1 (1º ao 5º ano)",
+                "Nível II - Ensino Fundamental - Etapa 2 (6º ao 9º ano)", 
+                "Nível III - Ensino Médio"
         ));
 
         // Resources

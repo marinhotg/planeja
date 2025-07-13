@@ -121,7 +121,7 @@ export default function ClassDefinitionForm() {
 
         {/* Nível */}
         <div className="self-stretch flex flex-col justify-start items-start gap-2">
-          <InputLabel htmlFor="level">Nível</InputLabel>
+          <InputLabel htmlFor="level">Nível Educacional</InputLabel>
           <div className="relative w-full">
             <select
               id="level"
@@ -129,7 +129,7 @@ export default function ClassDefinitionForm() {
               value={selectedLevel || ''}
               onChange={(e) => setSelectedLevel(e.target.value)}
             >
-              <option value="" className="text-gray-500">Selecione um nível</option>
+              <option value="" className="text-gray-500">Selecione um nível educacional</option>
               {levels.map((level) => (
                 <option key={level} value={level}>
                   {level}

@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 public class PromptBuilder {
 
     public String buildPrompt(LessonPlanRequest request, List<BNCCContent> habilidades) {
+        String nivelDetalhado = getNivelDetalhado(request.getNivel());
+        
         return """
             Você é um professor experiente da Educação de Jovens e Adultos (EJA) da disciplina %s no nível %s.
             
@@ -29,7 +31,7 @@ public class PromptBuilder {
             
             Detalhes da aula:
             * Disciplina: %s
-            * Nível: %s
+            * Nível Educacional: %s
             * Tema: %s
             * Habilidades da BNCC: %s
             * Duração total da aula: %s
@@ -77,10 +79,10 @@ public class PromptBuilder {
             7. Gere somente o JSON como resposta, sem explicações adicionais.
             """.formatted(
                 request.getDisciplina(),
-                request.getNivel(),
+                nivelDetalhado,
                 formatHabilidades(habilidades),
                 request.getDisciplina(),
-                request.getNivel(),
+                nivelDetalhado,
                 request.getTema(),
                 formatHabilidades(habilidades),
                 request.getDuracao(),
@@ -110,5 +112,24 @@ public class PromptBuilder {
             return "Não especificado";
         }
         return String.join(", ", list);
+    }
+
+    /**
+     * Converte o nível do frontend para uma descrição mais detalhada para o prompt
+     */
+    private String getNivelDetalhado(String nivel) {
+        if (nivel == null) {
+            return "Ensino Fundamental - Etapa 1 (1º ao 5º ano)";
+        }
+        
+        if (nivel.contains("Nível I") || nivel.contains("1º ao 5º")) {
+            return "Ensino Fundamental - Etapa 1 (1º ao 5º ano)";
+        } else if (nivel.contains("Nível II") || nivel.contains("6º ao 9º")) {
+            return "Ensino Fundamental - Etapa 2 (6º ao 9º ano)";
+        } else if (nivel.contains("Nível III") || nivel.contains("Ensino Médio")) {
+            return "Ensino Médio";
+        }
+        
+        return nivel; // retorna o valor original se não conseguir mapear
     }
 }
