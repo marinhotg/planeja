@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchLessonPlanById, deleteLessonPlan, GeneratedLessonPlan, ParsedGeneratedContent, submitFeedback } from '@/lib/api';
+import Button from "./Button";
 
 export default function GeneratedPlanContent() {
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedLessonPlan | null>(null);
@@ -71,11 +72,11 @@ export default function GeneratedPlanContent() {
   };
 
   if (loading) {
-    return <p className="text-center text-gray-500 w-full">Loading lesson plan...</p>;
+    return <p className="text-center text-gray-500 w-full">Carregando plano de aula...</p>;
   }
 
   if (error) {
-    return <p className="text-center text-red-500 w-full">Error: {error}</p>;
+    return <p className="text-center text-red-500 w-full">Erro: {error}</p>;
   }
 
   if (!generatedPlan) {
@@ -130,13 +131,20 @@ export default function GeneratedPlanContent() {
 
   return (
     <>
-      <PageTitle title="Personalize seu plano de aula" subtitle="" />
+      <div>
+        <PageTitle title="Personalize seu plano de aula" subtitle="" />
+        <div className="w-full text-center mt-4">
+          <button onClick={() => router.push('/dashboard')} className="text-blue-700 hover:underline">
+            Voltar ao Dashboard
+          </button>
+        </div>
+      </div>
 
-      <div className="w-full h-14 relative bg-white flex justify-center items-center">
+      <div className="w-full relative bg-white flex justify-center items-center">
         <h1 className="text-neutral-800 text-2xl font-bold text-center">Resultado do plano de aula gerado</h1>
       </div>
 
-      <div className="w-full flex justify-center items-center gap-6 mb-4">
+      <div className="w-full flex justify-center items-center gap-6">
         <button onClick={handleDownload} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
           <Image src="/download.svg" alt="Baixar" width={16} height={16} />
         </button>

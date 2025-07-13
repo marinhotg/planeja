@@ -87,10 +87,10 @@ export default function Header() {
             </div>
           )}
 
-          <div className="flex items-center gap-4 text-center text-white text-3xl font-bold font-inter">
+          <button onClick={() => router.push('/dashboard')} className="flex items-center gap-4 text-center text-white text-3xl font-bold font-inter cursor-pointer">
             <Image src="/logo.png" alt="PlanEJA logo" width={36} height={36} />
             PlanEJA
-          </div>
+          </button>
 
           {!isAuthPage && session && (
             <div className="relative" ref={userMenuRef}>

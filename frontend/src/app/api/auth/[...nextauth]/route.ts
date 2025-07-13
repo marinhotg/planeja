@@ -1,9 +1,6 @@
 import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 
-console.log("NEXT_PUBLIC_BACKEND_URL:", process.env.NEXT_PUBLIC_BACKEND_URL);
-console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
-
 // Helper function to check if a JWT is expired
 function isJwtExpired(token: string): boolean {
   try {

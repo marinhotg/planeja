@@ -121,11 +121,11 @@ export default function DashboardContent() {
   }, [plans, selectedDisciplineFilter, showFavoritesOnly, sortBy]);
 
   if (loading) {
-    return <p className="text-center text-gray-500 w-full">Loading lesson plans...</p>;
+    return <p className="text-center text-gray-500 w-full">Carregando planos de aula...</p>;
   }
 
   if (error) {
-    return <p className="text-center text-red-500 w-full">Error: {error}</p>;
+    return <p className="text-center text-red-500 w-full">Erro: {error}</p>;
   }
 
   return (
