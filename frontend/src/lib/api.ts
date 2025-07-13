@@ -76,7 +76,6 @@ export interface ClassProfile {
 }
 
 export interface ClassProfileRequest {
-  userId: string; // Assuming userId will be passed from frontend or derived from auth
   profileName: string;
   size?: number;
   educationLevels?: string[];
@@ -154,7 +153,11 @@ export const deleteClassProfile = async (id: string): Promise<void> => {
 };
 
 export const fetchClassProfileById = async (id: string): Promise<ClassProfile> => {
-  const response = await api.get(`/api/class-profiles/${id}`);
+  const session = await getSession();
+  if (!session || !session.user || !session.user.id) {
+    throw new Error("User not authenticated.");
+  }
+  const response = await api.get(`/api/class-profiles/${id}?userId=${session.user.id}`);
   return response.data;
 };
 

@@ -28,7 +28,7 @@ export default function NewClassProfileForm() {
   const [errorConfigs, setErrorConfigs] = useState<string | null>(null);
 
   // Mock user ID for now - replace with actual authenticated user ID
-  const MOCK_USER_ID = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"; 
+  // const MOCK_USER_ID = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"; 
 
   useEffect(() => {
     const loadConfigurations = async () => {
@@ -102,7 +102,6 @@ export default function NewClassProfileForm() {
     setError(null);
 
     const profileData: ClassProfileRequest = {
-      userId: MOCK_USER_ID,
       profileName,
       size: classSize || undefined,
       educationLevels: selectedEducationLevels.length > 0 ? selectedEducationLevels : undefined,
