@@ -10,6 +10,7 @@ interface PlanCardProps {
   onDelete: (id: string) => void; // Changed from number to string
   onFavorite: (id: string) => void; // Changed from number to string
   favorited: boolean;
+  isDownloading?: boolean;
 }
 
 export default function PlanCard({
@@ -21,6 +22,7 @@ export default function PlanCard({
   onDelete,
   onFavorite,
   favorited,
+  isDownloading = false,
 }: PlanCardProps) {
   return (
     <div className="flex flex-col justify-between w-full p-6 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-blue-700 items-center gap-4 overflow-hidden">
@@ -36,8 +38,16 @@ export default function PlanCard({
             <button onClick={() => onView(id)} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
               <Image src="/eye.svg" alt="Visualizar" width={16} height={16} />
             </button>
-            <button onClick={() => onDownload(id)} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
-              <Image src="/download.svg" alt="Baixar" width={16} height={16} />
+            <button 
+              onClick={() => onDownload(id)} 
+              disabled={isDownloading}
+              className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isDownloading ? (
+                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <Image src="/download.svg" alt="Baixar" width={16} height={16} />
+              )}
             </button>
             <button onClick={() => onDelete(id)} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
               <Image src="/trash.svg" alt="Deletar" width={16} height={16} />

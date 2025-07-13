@@ -6,7 +6,8 @@ import PlanCard from "./PlanCard";
 import { useRouter } from 'next/navigation';
 import { useState, useMemo, useEffect } from 'react';
 import FilterBox from "./FilterBox";
-import { fetchLessonPlans, deleteLessonPlan, toggleFavorite, ParsedGeneratedContent } from '@/lib/api';
+import { fetchLessonPlans, deleteLessonPlan, toggleFavorite, ParsedGeneratedContent, fetchLessonPlanById } from '@/lib/api';
+import { generatePDF, PDFPlanData } from '@/lib/pdfGenerator';
 
 interface DisplayPlan {
   id: string;
@@ -21,6 +22,7 @@ export default function DashboardContent() {
   const [plans, setPlans] = useState<DisplayPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const router = useRouter();
 
   const [selectedDisciplineFilter, setSelectedDisciplineFilter] = useState<string>('');
@@ -69,9 +71,55 @@ export default function DashboardContent() {
     router.push('/generated-plan');
   };
 
-  const handleDownload = (id: string) => {
-    console.log(`Baixar plano ${id}`);
-    alert("Download functionality not yet implemented.");
+  const handleDownload = async (id: string) => {
+    try {
+      setDownloadingId(id);
+      
+      // Fetch the complete lesson plan data
+      const lessonPlan = await fetchLessonPlanById(id);
+      
+      // Parse the generatedContent string into an object
+      let parsedContent: ParsedGeneratedContent;
+      try {
+        parsedContent = JSON.parse(lessonPlan.generatedContent);
+      } catch (e) {
+        console.error("Failed to parse generatedContent JSON:", e);
+        alert("Erro ao processar o conteúdo do plano para download.");
+        return;
+      }
+
+      // Transform backend response to frontend display structure
+      const transformedPlan = {
+        title: parsedContent.titulo,
+        sections: [
+          { title: "Objetivo Geral", content: parsedContent.objetivoGeral },
+          { title: "Habilidades da BNCC", content: parsedContent.habilidadesTrabalhadas?.join('; ') || '' },
+          { title: "Metodologia", content: parsedContent.metodologia },
+          { title: "Atividades", content: parsedContent.atividades?.map((activity: { titulo: string; duracao: string; descricao: string }) => `${activity.titulo} (${activity.duracao}): ${activity.descricao}`).join('\n') || '' },
+          { title: "Recursos Necessários", content: parsedContent.recursosNecessarios?.join(', ') || '' },
+          { title: "Métodos de Avaliação", content: parsedContent.metodosDeAvaliacao },
+        ],
+      };
+
+      const pdfData: PDFPlanData = {
+        title: transformedPlan.title,
+        discipline: lessonPlan.discipline,
+        level: lessonPlan.level,
+        theme: lessonPlan.theme,
+        durationMinutes: lessonPlan.durationMinutes,
+        quantity: lessonPlan.quantity,
+        resources: lessonPlan.resources,
+        sections: transformedPlan.sections,
+      };
+
+      await generatePDF(pdfData);
+      alert("PDF gerado com sucesso!");
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao gerar PDF. Por favor, tente novamente.');
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -172,6 +220,7 @@ export default function DashboardContent() {
               onDelete={handleDelete}
               onFavorite={handleFavorite}
               favorited={plan.favorited}
+              isDownloading={downloadingId === plan.id}
             />
           ))}
         </div>

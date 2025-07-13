@@ -5,11 +5,13 @@ import Image from "next/image";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchLessonPlanById, deleteLessonPlan, toggleFavorite, GeneratedLessonPlan, ParsedGeneratedContent, submitFeedback } from '@/lib/api';
+import { generatePDF, PDFPlanData } from '@/lib/pdfGenerator';
 
 export default function GeneratedPlanContent() {
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedLessonPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
   const router = useRouter();
 
   // State for feedback
@@ -70,10 +72,54 @@ export default function GeneratedPlanContent() {
     loadLessonPlan();
   }, [router]);
 
-  const handleDownload = () => {
-    console.log("Baixar plano");
-    // Implement download logic
-    alert("Download functionality not yet implemented.");
+  const handleDownload = async () => {
+    if (!generatedPlan) return;
+    
+    try {
+      setDownloading(true);
+      
+      // Parse the generatedContent string into an object
+      let parsedContent: ParsedGeneratedContent;
+      try {
+        parsedContent = JSON.parse(generatedPlan.generatedContent);
+      } catch (e) {
+        console.error("Failed to parse generatedContent JSON:", e);
+        alert("Erro ao processar o conteúdo do plano para download.");
+        return;
+      }
+
+      // Transform backend response to frontend display structure
+      const transformedPlan = {
+        title: parsedContent.titulo,
+        sections: [
+          { title: "Objetivo Geral", content: parsedContent.objetivoGeral },
+          { title: "Habilidades da BNCC", content: parsedContent.habilidadesTrabalhadas?.join('; ') || '' },
+          { title: "Metodologia", content: parsedContent.metodologia },
+          { title: "Atividades", content: parsedContent.atividades?.map((activity: { titulo: string; duracao: string; descricao: string }) => `${activity.titulo} (${activity.duracao}): ${activity.descricao}`).join('\n') || '' },
+          { title: "Recursos Necessários", content: parsedContent.recursosNecessarios?.join(', ') || '' },
+          { title: "Métodos de Avaliação", content: parsedContent.metodosDeAvaliacao },
+        ],
+      };
+
+      const pdfData: PDFPlanData = {
+        title: transformedPlan.title,
+        discipline: generatedPlan.discipline,
+        level: generatedPlan.level,
+        theme: generatedPlan.theme,
+        durationMinutes: generatedPlan.durationMinutes,
+        quantity: generatedPlan.quantity,
+        resources: generatedPlan.resources,
+        sections: transformedPlan.sections,
+      };
+
+      await generatePDF(pdfData);
+      alert("PDF gerado com sucesso!");
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao gerar PDF. Por favor, tente novamente.');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -179,8 +225,16 @@ export default function GeneratedPlanContent() {
       </div>
 
       <div className="w-full flex justify-center items-center gap-6 mb-4">
-        <button onClick={handleDownload} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
-          <Image src="/download.svg" alt="Baixar" width={16} height={16} />
+        <button 
+          onClick={handleDownload} 
+          disabled={downloading}
+          className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {downloading ? (
+            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            <Image src="/download.svg" alt="Baixar" width={16} height={16} />
+          )}
         </button>
         <button onClick={handleDelete} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
           <Image src="/trash.svg" alt="Deletar" width={16} height={16} />
