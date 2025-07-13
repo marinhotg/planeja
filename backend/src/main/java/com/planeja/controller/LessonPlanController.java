@@ -174,9 +174,8 @@ public class LessonPlanController {
         if (lessonPlanService.findByIdAndUserId(id, userId).isPresent()) {
             lessonPlanService.deleteById(id);
             return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}/feedback")
@@ -194,9 +193,8 @@ public class LessonPlanController {
             }
             LessonPlan updatedLessonPlan = lessonPlanService.save(lessonPlan);
             return ResponseEntity.ok(convertToDto(updatedLessonPlan));
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
     }
 
     private LessonPlanDTO convertToDto(LessonPlan lessonPlan) {
@@ -233,6 +231,8 @@ public class LessonPlanController {
         dto.setObservations(lessonPlan.getObservations());
         dto.setGeneratedContent(lessonPlan.getGeneratedContent());
         dto.setGenerationTimestamp(lessonPlan.getGenerationTimestamp());
+        dto.setRating(lessonPlan.getRating());
+        dto.setFeedbackText(lessonPlan.getFeedbackText());
         return dto;
     }
 

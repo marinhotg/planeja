@@ -20,20 +20,50 @@ export default function GeneratedPlanContent() {
   useEffect(() => {
     const loadLessonPlan = async () => {
       const storedPlan = sessionStorage.getItem('generatedLessonPlan');
+      console.log("useEffect: storedPlan from sessionStorage", storedPlan);
+
       if (storedPlan) {
         const parsedPlan: GeneratedLessonPlan = JSON.parse(storedPlan);
+        console.log("useEffect: parsedPlan from sessionStorage", parsedPlan);
+
         // Attempt to fetch from DB to get the latest, or use stored if fetch fails
         try {
           const fetchedPlan = await fetchLessonPlanById(parsedPlan.id);
+          console.log("useEffect: fetchedPlan from DB", fetchedPlan);
           setGeneratedPlan(fetchedPlan);
+          // Check if feedback already exists in fetched plan
+          if (fetchedPlan.rating !== null && fetchedPlan.rating !== undefined) {
+            setRating(fetchedPlan.rating);
+            setComment(fetchedPlan.feedbackText || "");
+            setIsFeedbackSubmitted(true);
+            console.log("useEffect: Feedback found in DB fetched plan. isFeedbackSubmitted set to true.", { rating: fetchedPlan.rating, feedbackText: fetchedPlan.feedbackText });
+          } else {
+            setRating(0);
+            setComment("");
+            setIsFeedbackSubmitted(false);
+            console.log("useEffect: No feedback found in DB fetched plan. isFeedbackSubmitted set to false.");
+          }
         } catch (err) {
           console.warn("Failed to fetch latest lesson plan from DB, using session storage.", err);
           setGeneratedPlan(parsedPlan);
+          // If using stored, check its feedback
+          if (parsedPlan.rating !== null && parsedPlan.rating !== undefined) {
+            setRating(parsedPlan.rating);
+            setComment(parsedPlan.feedbackText || "");
+            setIsFeedbackSubmitted(true);
+            console.log("useEffect: Feedback found in sessionStorage parsed plan. isFeedbackSubmitted set to true.", { rating: parsedPlan.rating, feedbackText: parsedPlan.feedbackText });
+          } else {
+            setRating(0);
+            setComment("");
+            setIsFeedbackSubmitted(false);
+            console.log("useEffect: No feedback found in sessionStorage parsed plan. isFeedbackSubmitted set to false.");
+          }
         } finally {
           setLoading(false);
+          console.log("useEffect: Loading finished.");
         }
       } else {
-        // If no plan is found, redirect back or show a message
+        console.log("useEffect: No plan found in sessionStorage. Redirecting.");
         router.push('/observations'); // Redirect to the previous step
       }
     };
@@ -121,6 +151,10 @@ export default function GeneratedPlanContent() {
     try {
       await submitFeedback(feedbackData);
       alert("Feedback enviado com sucesso!");
+      // Update the local state and session storage with the new feedback
+      const updatedPlan = { ...generatedPlan, rating, feedbackText: comment };
+      setGeneratedPlan(updatedPlan);
+      sessionStorage.setItem('generatedLessonPlan', JSON.stringify(updatedPlan));
       setIsFeedbackSubmitted(true);
     } catch (error) {
       console.error("Erro ao enviar feedback:", error);
@@ -161,8 +195,21 @@ export default function GeneratedPlanContent() {
       <div className="w-full p-6 bg-gray-50 mt-6">
         {isFeedbackSubmitted ? (
           <div className="w-full p-4 bg-green-100 rounded-md">
-          <p className="text-center text-green-800 font-medium">Você enviou sua avaliação. Obrigado pelo feedback!</p>
-        </div>
+            <p className="text-center text-green-800 font-medium mb-2">Você já avaliou este plano. Obrigado pelo feedback!</p>
+            <div className="flex items-center justify-center mb-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Image
+                  key={star}
+                  src={star <= rating ? "/filled-star.svg" : "/star.svg"}
+                  alt={`${star} star`}
+                  width={24}
+                  height={24}
+                  className="mx-0.5"
+                />
+              ))}
+            </div>
+            {comment && <p className="text-center text-gray-700 text-sm">Comentário: {comment}</p>}
+          </div>
         ) : (
           <>
             <h2 className="text-blue-700 text-xl font-bold mb-4">Avalie este plano de aula</h2>
