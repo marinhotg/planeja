@@ -4,7 +4,7 @@ import PageTitle from "./PageTitle";
 import Image from "next/image";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchLessonPlanById, deleteLessonPlan, GeneratedLessonPlan, ParsedGeneratedContent, submitFeedback } from '@/lib/api';
+import { fetchLessonPlanById, deleteLessonPlan, toggleFavorite, GeneratedLessonPlan, ParsedGeneratedContent, submitFeedback } from '@/lib/api';
 
 export default function GeneratedPlanContent() {
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedLessonPlan | null>(null);
@@ -94,10 +94,18 @@ export default function GeneratedPlanContent() {
     }
   };
 
-  const handleFavorite = () => {
-    console.log("Favoritar plano");
-    // Implement favorite logic (e.g., update a field in the DB)
-    alert("Favorite functionality not yet implemented.");
+  const handleFavorite = async () => {
+    if (!generatedPlan || !generatedPlan.id) return;
+    
+    try {
+      const updatedPlan = await toggleFavorite(generatedPlan.id);
+      setGeneratedPlan(updatedPlan);
+      // Update session storage with the updated plan
+      sessionStorage.setItem('generatedLessonPlan', JSON.stringify(updatedPlan));
+    } catch (err) {
+      console.error('Erro ao favoritar plano:', err);
+      alert('Erro ao favoritar o plano. Tente novamente.');
+    }
   };
 
   if (loading) {
@@ -178,7 +186,7 @@ export default function GeneratedPlanContent() {
           <Image src="/trash.svg" alt="Deletar" width={16} height={16} />
         </button>
         <button onClick={handleFavorite} className="w-9 h-9 relative bg-sky-100 rounded-[100px] flex justify-center items-center cursor-pointer hover:bg-sky-200">
-          <Image src="/heart.svg" alt="Favoritar" width={16} height={16} />
+          <Image src={generatedPlan.favorited ? "/filled-heart.svg" : "/heart.svg"} alt="Favoritar" width={16} height={16} />
         </button>
       </div>
 

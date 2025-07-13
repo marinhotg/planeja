@@ -41,6 +41,7 @@ export interface GeneratedLessonPlan {
   generationTimestamp: string;
   rating?: number;
   feedbackText?: string;
+  favorited?: boolean;
 }
 
 export interface FeedbackRequest {
@@ -168,4 +169,9 @@ export const fetchConfigurations = async (): Promise<ConfigurationResponse> => {
 
 export const submitFeedback = async (feedbackData: FeedbackRequest): Promise<void> => {
   await api.put(`/api/lesson-plans/${feedbackData.planId}/feedback`, { rating: feedbackData.rating, feedbackText: feedbackData.comment });
+};
+
+export const toggleFavorite = async (planId: string): Promise<GeneratedLessonPlan> => {
+  const response = await api.put(`/api/lesson-plans/${planId}/favorite`);
+  return response.data;
 };

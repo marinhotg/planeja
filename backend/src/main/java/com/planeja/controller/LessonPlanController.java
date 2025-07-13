@@ -197,6 +197,20 @@ public class LessonPlanController {
         return ResponseEntity.notFound().build();
     }
 
+    @PutMapping("/{id}/favorite")
+    public ResponseEntity<LessonPlanDTO> toggleFavorite(@PathVariable UUID id, Authentication authentication) {
+        User currentUser = ((com.planeja.model.UserDetailsImpl) authentication.getPrincipal()).getUser();
+        UUID userId = currentUser.getId();
+        Optional<LessonPlan> existingLessonPlan = lessonPlanService.findByIdAndUserId(id, userId);
+        if (existingLessonPlan.isPresent()) {
+            LessonPlan lessonPlan = existingLessonPlan.get();
+            lessonPlan.setFavorited(!lessonPlan.getFavorited());
+            LessonPlan updatedLessonPlan = lessonPlanService.save(lessonPlan);
+            return ResponseEntity.ok(convertToDto(updatedLessonPlan));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     private LessonPlanDTO convertToDto(LessonPlan lessonPlan) {
         LessonPlanDTO dto = new LessonPlanDTO();
         dto.setId(lessonPlan.getId());
@@ -233,6 +247,7 @@ public class LessonPlanController {
         dto.setGenerationTimestamp(lessonPlan.getGenerationTimestamp());
         dto.setRating(lessonPlan.getRating());
         dto.setFeedbackText(lessonPlan.getFeedbackText());
+        dto.setFavorited(lessonPlan.getFavorited());
         return dto;
     }
 
@@ -264,6 +279,7 @@ public class LessonPlanController {
         lessonPlan.setGenerationTimestamp(dto.getGenerationTimestamp());
         lessonPlan.setRating(dto.getRating());
         lessonPlan.setFeedbackText(dto.getFeedbackText());
+        lessonPlan.setFavorited(dto.getFavorited());
         return lessonPlan;
     }
 }

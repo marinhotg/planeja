@@ -6,7 +6,7 @@ import PlanCard from "./PlanCard";
 import { useRouter } from 'next/navigation';
 import { useState, useMemo, useEffect } from 'react';
 import FilterBox from "./FilterBox";
-import { fetchLessonPlans, deleteLessonPlan, ParsedGeneratedContent } from '@/lib/api';
+import { fetchLessonPlans, deleteLessonPlan, toggleFavorite, ParsedGeneratedContent } from '@/lib/api';
 
 interface DisplayPlan {
   id: string;
@@ -49,7 +49,7 @@ export default function DashboardContent() {
             subtitle: plan.level, // Using level as subtitle for now
             discipline: plan.discipline,
             date: new Date(plan.generationTimestamp).toLocaleDateString(),
-            favorited: false, // Assuming false for now, as no backend field for this
+            favorited: plan.favorited || false,
           };
         });
         setPlans(displayPlans);
@@ -86,13 +86,16 @@ export default function DashboardContent() {
     }
   };
 
-  const handleFavorite = (id: string) => {
-    console.log(`Favoritar plano ${id}`);
-    // For now, favorited is a local state. If persistence is needed, update backend.
-    setPlans(plans.map(plan =>
-      plan.id === id ? { ...plan, favorited: !plan.favorited } : plan
-    ));
-    alert("Favorite functionality is local only. Not persisted to backend.");
+  const handleFavorite = async (id: string) => {
+    try {
+      const updatedPlan = await toggleFavorite(id);
+      setPlans(plans.map(plan =>
+        plan.id === id ? { ...plan, favorited: updatedPlan.favorited || false } : plan
+      ));
+    } catch (err) {
+      console.error('Erro ao favoritar plano:', err);
+      alert('Erro ao favoritar o plano. Tente novamente.');
+    }
   };
 
   const handleGenerateNewPlan = () => {
