@@ -1,10 +1,7 @@
-target/classes/
-target/test-classes/
-target/maven-*
-target/surefire-reports/
-.git/
-.gitignore
-*.md
+target/
 .mvn/
-mvnw
-mvnw.cmd
+.env
+*.log
+.git
+.gitignore
+README.md

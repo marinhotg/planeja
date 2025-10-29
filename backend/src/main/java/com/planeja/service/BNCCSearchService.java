@@ -4,7 +4,6 @@ import com.planeja.config.PineconeConfig;
 import com.planeja.model.BNCCContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.embedding.EmbeddingClient;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,13 +26,13 @@ public class BNCCSearchService {
 
     private final RestTemplate restTemplate;
     private final PineconeConfig pineconeConfig;
-    private final EmbeddingClient embeddingClient;
+    private final GeminiEmbeddingService geminiEmbeddingService;
     private final ObjectMapper objectMapper;
 
-    public BNCCSearchService(RestTemplate restTemplate, PineconeConfig pineconeConfig, EmbeddingClient embeddingClient) {
+    public BNCCSearchService(RestTemplate restTemplate, PineconeConfig pineconeConfig, GeminiEmbeddingService geminiEmbeddingService) {
         this.restTemplate = restTemplate;
         this.pineconeConfig = pineconeConfig;
-        this.embeddingClient = embeddingClient;
+        this.geminiEmbeddingService = geminiEmbeddingService;
         this.objectMapper = new ObjectMapper();
     }
 
@@ -42,10 +41,8 @@ public class BNCCSearchService {
         logger.info("Executing search with query: '{}', area: '{}', etapa: '{}', anos: {}, topK: {}", query, area, etapa, anos, topK);
 
         try {
-            List<Double> embeddingDouble = embeddingClient.embed(query);
-            List<Float> embedding = embeddingDouble.stream()
-                    .map(Double::floatValue)
-                    .collect(Collectors.toList());
+            // Use GeminiEmbeddingService instead of local embedding client
+            List<Float> embedding = geminiEmbeddingService.generateEmbedding(query);
 
             String pineconeUrl = String.format("%s/query", pineconeConfig.getHost());
 

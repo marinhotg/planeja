@@ -1,0 +1,47 @@
+services:
+  # Backend Spring Boot Application
+  - type: web
+    name: planeja-backend
+    runtime: java
+    plan: free
+    region: oregon
+    buildCommand: cd backend && mvn clean install -DskipTests
+    startCommand: cd backend && java -jar target/planeja-backend-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: JAVA_OPTS
+        value: -Xmx512m -Xms256m
+      - key: PINECONE_API_KEY
+        sync: false
+      - key: PINECONE_HOST
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DB_HOST
+        fromDatabase:
+          name: planeja-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: planeja-postgres
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: planeja-postgres
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: planeja-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: planeja-postgres
+          property: password
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+
+databases:
+  - name: planeja-postgres
+    databaseName: planeja
+    user: planeja
+    plan: free
+    region: oregon

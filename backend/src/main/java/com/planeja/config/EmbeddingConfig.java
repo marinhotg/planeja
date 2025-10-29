@@ -8,8 +8,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class EmbeddingConfig {
 
-    @Bean
-    public EmbeddingClient embeddingClient() {
-        return new TransformersEmbeddingClient();
-    }
+    // Temporarily commented out to avoid GitHub rate limit issues
+    // The embedding model download from GitHub is failing with 429 error
+    // TODO: Re-enable when the rate limit is lifted or use a local model
+
+    // @Bean
+    // public EmbeddingClient embeddingClient() {
+    //     return new TransformersEmbeddingClient();
+    // }
 }
