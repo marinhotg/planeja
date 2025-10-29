@@ -2,9 +2,27 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
 
-// Ícones SVG simples (somente os utilizados)
+// Ícones SVG simples
+const BookOpen = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+    />
+  </svg>
+)
+
+const Clock = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" strokeWidth={2}></circle>
+    <polyline points="12,6 12,12 16,14" strokeWidth={2}></polyline>
+  </svg>
+)
+
 const Users = ({ className }: { className?: string }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path
@@ -41,8 +59,87 @@ const Zap = ({ className }: { className?: string }) => (
   </svg>
 )
 
+const translations = {
+  pt: {
+    free: "100% Gratuito • Sem Limitações",
+    heroTitle1: "A união entre o que o professor",
+    heroTitle2: "precisa",
+    heroTitle3: "e o que o aluno",
+    heroTitle4: "merece",
+    heroDescription:
+      "O PlanEJA é uma plataforma inteligente de geração automática de planos de aula para a Educação de Jovens e Adultos (EJA), feita para apoiar quem ensina e transformar a experiência de quem aprende.",
+    startNow: "Comece Agora - É Grátis",
+    totallyFree: "Totalmente gratuito",
+    alignedBNCC: "Alinhado à BNCC",
+    plansInSeconds: "Planos em segundos",
+    whyDifferent: "Por que o PlanEJA é diferente?",
+    whyDescription:
+      "Sabemos que as turmas da EJA são marcadas por histórias de vida diversas, diferentes níveis de escolaridade e desafios únicos.",
+    smartPersonalization: "Personalização Inteligente",
+    smartPersonalizationDesc:
+      "Planos adaptados ao perfil da turma, respeitando heterogeneidade e contexto social específico.",
+    instantGeneration: "Geração Instantânea",
+    instantGenerationDesc:
+      "Em segundos, receba um plano completo com objetivos, conteúdos contextualizados e metodologias ativas.",
+    alignedTitle: "Alinhado à BNCC",
+    alignedDesc: "Garantia de qualidade e relevância do ensino, seguindo diretrizes da Base Nacional Comum Curricular.",
+    howWorks: "Como funciona?",
+    howWorksDesc: "Simples, rápido e eficiente em apenas 3 passos",
+    step1Title: "Informe os Parâmetros",
+    step1Desc: "Tema da aula, duração, recursos disponíveis e perfil da turma",
+    step2Title: "IA Gera o Plano",
+    step2Desc: "Nossa inteligência artificial cria um plano personalizado em segundos",
+    step3Title: "Aplique na Sala",
+    step3Desc: "Receba o plano completo pronto para usar com seus alunos",
+    ctaTitle: "PlanEJA: Planeje com agilidade, ensine com propósito",
+    ctaDescription:
+      "Transforme a experiência de ensino na EJA. Seus alunos merecem o melhor, e você merece as melhores ferramentas.",
+    startNowBtn: "Começar Agora",
+    login: "Entrar",
+  },
+  es: {
+    free: "100% Gratuito • Sin Limitaciones",
+    heroTitle1: "La unión entre lo que el profesor",
+    heroTitle2: "necesita",
+    heroTitle3: "y lo que el alumno",
+    heroTitle4: "merece",
+    heroDescription:
+      "PlanEJA es una plataforma inteligente de generación automática de planes de clase para la Educación de Jóvenes y Adultos (EJA), hecha para apoyar a quien enseña y transformar la experiencia de quien aprende.",
+    startNow: "Comience Ahora - Es Gratis",
+    totallyFree: "Totalmente gratuito",
+    alignedBNCC: "Alineado a la BNCC",
+    plansInSeconds: "Planes en segundos",
+    whyDifferent: "¿Por qué PlanEJA es diferente?",
+    whyDescription:
+      "Sabemos que las clases de EJA están marcadas por historias de vida diversas, diferentes niveles de escolaridad y desafíos únicos.",
+    smartPersonalization: "Personalización Inteligente",
+    smartPersonalizationDesc:
+      "Planes adaptados al perfil de la clase, respetando heterogeneidad y contexto social específico.",
+    instantGeneration: "Generación Instantánea",
+    instantGenerationDesc:
+      "En segundos, reciba un plan completo con objetivos, contenidos contextualizados y metodologías activas.",
+    alignedTitle: "Alineado a la BNCC",
+    alignedDesc:
+      "Garantía de calidad y relevancia de la enseñanza, siguiendo directrices de la Base Nacional Común Curricular.",
+    howWorks: "¿Cómo funciona?",
+    howWorksDesc: "Simple, rápido y eficiente en solo 3 pasos",
+    step1Title: "Informe los Parámetros",
+    step1Desc: "Tema de la clase, duración, recursos disponibles y perfil de la clase",
+    step2Title: "IA Genera el Plan",
+    step2Desc: "Nuestra inteligencia artificial crea un plan personalizado en segundos",
+    step3Title: "Aplique en el Aula",
+    step3Desc: "Reciba el plan completo listo para usar con sus alumnos",
+    ctaTitle: "PlanEJA: Planifique con agilidad, enseñe con propósito",
+    ctaDescription:
+      "Transforme la experiencia de enseñanza en EJA. Sus alumnos merecen lo mejor, y usted merece las mejores herramientas.",
+    startNowBtn: "Comenzar Ahora",
+    login: "Entrar",
+  },
+}
+
 export default function PlanEJALanding() {
-  const router = useRouter()
+  const [language, setLanguage] = useState<"pt" | "es">("pt")
+  const t = translations[language]
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
@@ -54,11 +151,26 @@ export default function PlanEJALanding() {
             <span className="text-2xl font-bold text-gray-900">PlanEJA</span>
           </Link>
           <div className="flex items-center space-x-3">
-            <button
-              className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-md hover:bg-gray-100 transition-colors transition-transform hover:scale-105 active:scale-95 cursor-pointer"
-              onClick={() => router.push("/login")}
-            >
-              Entrar
+            <div className="flex items-center space-x-2 border rounded-md p-1 bg-gray-50">
+              <button
+                onClick={() => setLanguage("pt")}
+                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                  language === "pt" ? "bg-green-600 text-white" : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                🇧🇷 PT
+              </button>
+              <button
+                onClick={() => setLanguage("es")}
+                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                  language === "es" ? "bg-green-600 text-white" : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                🇪🇸 ES
+              </button>
+            </div>
+            <button className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-md hover:bg-gray-100 transition-colors">
+              {t.login}
             </button>
           </div>
         </div>
@@ -71,36 +183,30 @@ export default function PlanEJALanding() {
             <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="space-y-6">
                 <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800 border-green-200">
-                  100% Gratuito • Sem Limitações
+                  {t.free}
                 </div>
                 <h1 className="text-4xl font-bold tracking-tight sm:text-5xl xl:text-6xl text-gray-900">
-                  A união entre o que o professor <span className="text-green-600">precisa</span> e o que o aluno{" "}
-                  <span className="text-blue-600">merece</span>
+                  {t.heroTitle1} <span className="text-green-600">{t.heroTitle2}</span> {t.heroTitle3}{" "}
+                  <span className="text-blue-600">{t.heroTitle4}</span>
                 </h1>
-                <p className="text-xl text-gray-600 max-w-2xl">
-                  O PlanEJA é uma plataforma inteligente de geração automática de planos de aula para a Educação de
-                  Jovens e Adultos (EJA), feita para apoiar quem ensina e transformar a experiência de quem aprende.
-                </p>
+                <p className="text-xl text-gray-600 max-w-2xl">{t.heroDescription}</p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <button
-                    onClick={() => router.push("/login")}
-                    className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white text-lg font-medium rounded-md transition-colors transition-transform hover:scale-105 active:scale-95 cursor-pointer"
-                  >
-                    Comece Agora - É Grátis
+                  <button className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white text-lg font-medium rounded-md transition-colors">
+                    {t.startNow}
                   </button>
                 </div>
                 <div className="flex items-center space-x-6 text-sm text-gray-600">
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span>Totalmente gratuito</span>
+                    <span>{t.totallyFree}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span>Alinhado à BNCC</span>
+                    <span>{t.alignedBNCC}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span>Planos em segundos</span>
+                    <span>{t.plansInSeconds}</span>
                   </div>
                 </div>
               </div>
@@ -115,35 +221,26 @@ export default function PlanEJALanding() {
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center space-y-4 mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Por que o PlanEJA é diferente?</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Sabemos que as turmas da EJA são marcadas por histórias de vida diversas, diferentes níveis de
-                escolaridade e desafios únicos.
-              </p>
+              <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">{t.whyDifferent}</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">{t.whyDescription}</p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               <div className="rounded-lg border bg-white p-6 shadow-sm hover:border-green-200 transition-colors">
                 <Users className="h-10 w-10 text-green-600 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Personalização Inteligente</h3>
-                <p className="text-gray-600">
-                  Planos adaptados ao perfil da turma, respeitando heterogeneidade e contexto social específico.
-                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.smartPersonalization}</h3>
+                <p className="text-gray-600">{t.smartPersonalizationDesc}</p>
               </div>
 
               <div className="rounded-lg border bg-white p-6 shadow-sm hover:border-blue-200 transition-colors">
                 <Zap className="h-10 w-10 text-blue-600 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Geração Instantânea</h3>
-                <p className="text-gray-600">
-                  Em segundos, receba um plano completo com objetivos, conteúdos contextualizados e metodologias ativas.
-                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.instantGeneration}</h3>
+                <p className="text-gray-600">{t.instantGenerationDesc}</p>
               </div>
 
               <div className="rounded-lg border bg-white p-6 shadow-sm hover:border-orange-200 transition-colors">
                 <Target className="h-10 w-10 text-orange-600 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Alinhado à BNCC</h3>
-                <p className="text-gray-600">
-                  Garantia de qualidade e relevância do ensino, seguindo diretrizes da Base Nacional Comum Curricular.
-                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.alignedTitle}</h3>
+                <p className="text-gray-600">{t.alignedDesc}</p>
               </div>
             </div>
           </div>
@@ -153,32 +250,32 @@ export default function PlanEJALanding() {
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center space-y-4 mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Como funciona?</h2>
-              <p className="text-xl text-gray-600">Simples, rápido e eficiente em apenas 3 passos</p>
+              <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">{t.howWorks}</h2>
+              <p className="text-xl text-gray-600">{t.howWorksDesc}</p>
             </div>
             <div className="grid gap-8 md:grid-cols-3">
               <div className="text-center space-y-4">
                 <div className="w-16 h-16 bg-green-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto">
                   1
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">Informe os Parâmetros</h3>
-                <p className="text-gray-600">Tema da aula, duração, recursos disponíveis e perfil da turma</p>
+                <h3 className="text-xl font-semibold text-gray-900">{t.step1Title}</h3>
+                <p className="text-gray-600">{t.step1Desc}</p>
               </div>
 
               <div className="text-center space-y-4">
                 <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto">
                   2
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">IA Gera o Plano</h3>
-                <p className="text-gray-600">Nossa inteligência artificial cria um plano personalizado em segundos</p>
+                <h3 className="text-xl font-semibold text-gray-900">{t.step2Title}</h3>
+                <p className="text-gray-600">{t.step2Desc}</p>
               </div>
 
               <div className="text-center space-y-4">
                 <div className="w-16 h-16 bg-orange-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto">
                   3
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">Aplique na Sala</h3>
-                <p className="text-gray-600">Receba o plano completo pronto para usar com seus alunos</p>
+                <h3 className="text-xl font-semibold text-gray-900">{t.step3Title}</h3>
+                <p className="text-gray-600">{t.step3Desc}</p>
               </div>
             </div>
           </div>
@@ -188,17 +285,11 @@ export default function PlanEJALanding() {
         <section className="py-16 bg-gradient-to-r from-green-600 to-blue-600 text-white">
           <div className="container mx-auto px-4 md:px-6 text-center">
             <div className="space-y-6 max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold sm:text-4xl">PlanEJA: Planeje com agilidade, ensine com propósito</h2>
-              <p className="text-xl opacity-90">
-                Transforme a experiência de ensino na EJA. Seus alunos merecem o melhor, e você merece as melhores
-                ferramentas.
-              </p>
+              <h2 className="text-3xl font-bold sm:text-4xl">{t.ctaTitle}</h2>
+              <p className="text-xl opacity-90">{t.ctaDescription}</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button
-                  onClick={() => router.push("/login")}
-                  className="px-8 py-3 bg-white text-green-600 hover:bg-gray-100 text-lg font-medium rounded-md transition-colors transition-transform hover:scale-105 active:scale-95 cursor-pointer"
-                >
-                  Começar Agora
+                <button className="px-8 py-3 bg-white text-green-600 hover:bg-gray-100 text-lg font-medium rounded-md transition-colors">
+                  {t.startNowBtn}
                 </button>
               </div>
             </div>
