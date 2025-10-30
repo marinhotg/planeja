@@ -34,7 +34,7 @@ export default function Header() {
   }, []);
 
   const handleLogout = () => {
-    signOut();
+    signOut({ callbackUrl: '/' });
     setShowLogoutButton(false);
   };
 
