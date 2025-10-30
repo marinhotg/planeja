@@ -71,12 +71,13 @@ export default function PlanGenerationLoading({ isVisible }: PlanGenerationLoadi
         if (prev >= 100) {
           return 100;
         }
-        
+
         // Progresso mais lento no início e mais rápido no final
         const progressRatio = prev / 100;
         const speedMultiplier = currentStepData.progressSpeed * (1 + progressRatio * 0.5);
-        
-        return prev + (Math.random() * 2 + 1) * speedMultiplier;
+
+        const nextProgress = prev + (Math.random() * 2 + 1) * speedMultiplier;
+        return Math.min(nextProgress, 100);
       });
     }, 150);
 
@@ -112,7 +113,7 @@ export default function PlanGenerationLoading({ isVisible }: PlanGenerationLoadi
   }, [isVisible, steps, currentStep, stepProgress]);
 
   // Progresso total considerando etapa atual + progresso interno
-  const totalProgress = ((currentStep + stepProgress / 100) / steps.length) * 100;
+  const totalProgress = Math.min(((currentStep + Math.min(stepProgress, 100) / 100) / steps.length) * 100, 100);
 
   if (!isVisible) return null;
 
@@ -179,16 +180,16 @@ export default function PlanGenerationLoading({ isVisible }: PlanGenerationLoadi
                   {index === currentStep && (
                     <div className="mt-2">
                       <div className="w-full bg-blue-200 rounded-full h-1 overflow-hidden">
-                        <div 
+                        <div
                           className="bg-gradient-to-r from-blue-500 to-blue-600 h-1 rounded-full transition-all duration-300 ease-out relative"
-                          style={{ width: `${stepProgress}%` }}
+                          style={{ width: `${Math.min(stepProgress, 100)}%` }}
                         >
                           {/* Efeito de brilho na barra de progresso */}
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"></div>
                         </div>
                       </div>
                       <p className="text-xs text-blue-600 mt-1 font-medium">
-                        {Math.round(stepProgress)}% desta etapa
+                        {Math.round(Math.min(stepProgress, 100))}% desta etapa
                       </p>
                     </div>
                   )}
@@ -201,14 +202,14 @@ export default function PlanGenerationLoading({ isVisible }: PlanGenerationLoadi
             <div className="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
               <div 
                 className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500 ease-out relative"
-                style={{ width: `${totalProgress}%` }}
+                style={{ width: `${Math.min(totalProgress, 100)}%` }}
               >
                 {/* Efeito de brilho */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
               </div>
             </div>
             <p className="text-xs text-gray-500 mt-2 font-medium">
-              {Math.round(totalProgress)}% concluído
+              {Math.round(Math.min(totalProgress, 100))}% concluído
             </p>
           </div>
 
