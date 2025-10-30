@@ -81,6 +81,37 @@ public class GeminiService {
         }
     }
 
+    public String generateFeedbackSummary(String prompt) {
+        logger.info("Generating feedback summary with prompt: {}", prompt);
+        String url = String.format("%s/models/%s:generateContent?key=%s", baseUrl, model, apiKey);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> content = new HashMap<>();
+        content.put("parts", Collections.singletonList(Collections.singletonMap("text", prompt)));
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("contents", Collections.singletonList(content));
+
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+        try {
+            com.fasterxml.jackson.databind.JsonNode rootNode = restTemplate.postForObject(url, requestEntity, com.fasterxml.jackson.databind.JsonNode.class);
+
+            String textResponse = rootNode
+                    .path("candidates").get(0)
+                    .path("content")
+                    .path("parts").get(0)
+                    .path("text").asText();
+
+            return textResponse.trim();
+        } catch (Exception e) {
+            logger.error("Error calling Gemini API for feedback summary", e);
+            throw new RuntimeException("Failed to generate feedback summary from Gemini", e);
+        }
+    }
+
     private String extractJsonFromMarkdown(String markdown) {
         String cleaned = markdown.trim();
         if (cleaned.startsWith("```json")) {
