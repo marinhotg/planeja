@@ -2,6 +2,7 @@ package com.planeja.service;
 
 import com.planeja.model.BNCCContent;
 import com.planeja.model.LessonPlanRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,15 +10,34 @@ import java.util.stream.Collectors;
 @Service
 public class PromptBuilder {
 
+    @Autowired
+    private FeedbackAnalysisService feedbackAnalysisService;
+
     public String buildPrompt(LessonPlanRequest request, List<BNCCContent> habilidades) {
         String nivelDetalhado = getNivelDetalhado(request.getNivel());
-        
+
+        // Get user feedback summary to personalize the prompt
+        String feedbackSummary = "";
+        if (request.getUserId() != null) {
+            feedbackSummary = feedbackAnalysisService.getFeedbackSummaryForUser(request.getUserId());
+        }
+
+        String personalizedGuidance = "";
+        if (!feedbackSummary.isEmpty()) {
+            personalizedGuidance = String.format("""
+
+                PERSONALIZAÇÃO BASEADA EM FEEDBACKS ANTERIORES:
+                Com base nos feedbacks que você deu em planos anteriores: %s
+                Por favor, ajuste o plano considerando essas preferências pessoais identificadas.
+                """, feedbackSummary);
+        }
+
         return """
             Você é um professor experiente da Educação de Jovens e Adultos (EJA) da disciplina %s no nível %s.
-            
+
             Crie um plano de aula contextualizado para EJA baseado EXCLUSIVAMENTE nas habilidades da BNCC fornecidas: %s.
-            O plano de aula deve ser completo, relevante e aplicável, considerando os princípios da andragogia e as características dos estudantes adultos da EJA.
-            
+            O plano de aula deve ser completo, relevante e aplicável, considerando os princípios da andragogia e as características dos estudantes adultos da EJA.%s
+
             Siga estes princípios da andragogia na elaboração:
             
             1. Necessidade de saber – Explique claramente o porquê do conteúdo, relacionando-o a situações do cotidiano.
@@ -81,6 +101,7 @@ public class PromptBuilder {
                 request.getDisciplina(),
                 nivelDetalhado,
                 formatHabilidades(habilidades),
+                personalizedGuidance,
                 request.getDisciplina(),
                 nivelDetalhado,
                 request.getTema(),

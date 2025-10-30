@@ -7,6 +7,7 @@ import com.planeja.model.User;
 import com.planeja.service.LessonPlanService;
 import com.planeja.service.UserService;
 import com.planeja.service.ClassProfileService;
+import com.planeja.service.FeedbackAnalysisService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.Authentication;
@@ -39,6 +40,9 @@ public class LessonPlanController {
 
     @Autowired
     private ClassProfileService classProfileService;
+
+    @Autowired
+    private FeedbackAnalysisService feedbackAnalysisService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -185,13 +189,24 @@ public class LessonPlanController {
         Optional<LessonPlan> existingLessonPlan = lessonPlanService.findByIdAndUserId(id, userId);
         if (existingLessonPlan.isPresent()) {
             LessonPlan lessonPlan = existingLessonPlan.get();
+            boolean hasNewFeedback = false;
+
             if (lessonPlanDTO.getRating() != null) {
                 lessonPlan.setRating(lessonPlanDTO.getRating());
+                hasNewFeedback = true;
             }
             if (lessonPlanDTO.getFeedbackText() != null) {
                 lessonPlan.setFeedbackText(lessonPlanDTO.getFeedbackText());
+                hasNewFeedback = true;
             }
+
             LessonPlan updatedLessonPlan = lessonPlanService.save(lessonPlan);
+
+            // Trigger asynchronous feedback analysis when new feedback is submitted
+            if (hasNewFeedback) {
+                feedbackAnalysisService.analyzeFeedbacksForUser(userId);
+            }
+
             return ResponseEntity.ok(convertToDto(updatedLessonPlan));
         }
         return ResponseEntity.notFound().build();
