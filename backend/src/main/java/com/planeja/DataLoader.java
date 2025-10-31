@@ -5,6 +5,7 @@ import com.planeja.model.LessonPlan;
 import com.planeja.model.User;
 import com.planeja.repository.ClassProfileRepository;
 import com.planeja.repository.LessonPlanRepository;
+import com.planeja.repository.UserFeedbackSummaryRepository;
 import com.planeja.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class DataLoader implements CommandLineRunner {
 
     @Autowired
     private LessonPlanRepository lessonPlanRepository;
+
+    @Autowired
+    private UserFeedbackSummaryRepository userFeedbackSummaryRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -84,6 +88,7 @@ public class DataLoader implements CommandLineRunner {
         System.out.println("Cleaning up existing data...");
         lessonPlanRepository.deleteAllInBatch();
         classProfileRepository.deleteAllInBatch();
+        userFeedbackSummaryRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
         System.out.println("Data cleanup complete.");
     }

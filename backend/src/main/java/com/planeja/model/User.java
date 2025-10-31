@@ -34,6 +34,9 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserFeedbackSummary feedbackSummary;
+
     public User() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
@@ -119,6 +122,14 @@ public class User {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public UserFeedbackSummary getFeedbackSummary() {
+        return feedbackSummary;
+    }
+
+    public void setFeedbackSummary(UserFeedbackSummary feedbackSummary) {
+        this.feedbackSummary = feedbackSummary;
     }
 
     @PreUpdate
